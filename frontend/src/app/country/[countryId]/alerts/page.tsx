@@ -1,8 +1,10 @@
+import { PageHeaderNav } from "@/components/PageHeaderNav";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CountryCode } from "@/lib/countries";
 import { requireSession } from "@/lib/server-auth";
 import { fetchJson } from "@/lib/client";
 import { Alert } from "@/types";
-import { PageHeaderNav } from "@/components/PageHeaderNav";
 
 interface Props {
   params: Promise<{ countryId: CountryCode }>;
@@ -25,11 +27,19 @@ export default async function AlertsPage({ params }: Props) {
         ]}
       />
       <h1 className="text-3xl font-bold">Alertes - {countryId}</h1>
-      <ul className="mt-6 space-y-2">
+      <div className="mt-6 space-y-3">
         {alerts.map((alert) => (
-          <li className="alert alert-warning" key={alert.id}>{alert.alert_type}: {alert.message}</li>
+          <Card key={alert.id}>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base flex items-center justify-between">
+                <span>{alert.alert_type}</span>
+                <Badge variant="warning">Alerte</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>{alert.message}</CardContent>
+          </Card>
         ))}
-      </ul>
+      </div>
     </main>
   );
 }

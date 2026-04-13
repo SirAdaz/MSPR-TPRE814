@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { PageHeaderNav } from "@/components/PageHeaderNav";
+import { Button } from "@/components/ui/button";
 import { CountryCode } from "@/lib/countries";
 import { requireSession } from "@/lib/server-auth";
 
@@ -24,8 +25,8 @@ export default async function CountryPage({ params }: Props) {
       />
       <h1 className="text-3xl font-bold">Pays {countryId}</h1>
       <div className="mt-6 flex gap-3">
-        <Link className="btn btn-primary" href={`/country/${countryId}/lots`}>Lots</Link>
-        <Link className="btn btn-secondary" href={`/country/${countryId}/alerts`}>Alertes</Link>
+        <Link href={`/country/${countryId}/lots`}><Button>Lots</Button></Link>
+        <Link href={`/country/${countryId}/alerts`}><Button variant="secondary">Alertes</Button></Link>
       </div>
     </main>
   );

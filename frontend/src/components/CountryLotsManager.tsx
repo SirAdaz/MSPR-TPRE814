@@ -2,6 +2,11 @@
 
 import { FormEvent, useEffect, useState } from "react";
 
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Lot } from "@/types";
 
 type Props = {
@@ -92,82 +97,78 @@ export function CountryLotsManager({ countryId }: Props) {
 
   return (
     <div className="space-y-6">
-      <div className="card bg-base-200 shadow-sm">
-        <div className="card-body">
-          <h2 className="card-title">Ajouter un lot</h2>
+      <Card>
+        <CardHeader>
+          <CardTitle>Ajouter un lot</CardTitle>
+        </CardHeader>
+        <CardContent>
           <form className="grid gap-3 md:grid-cols-4" onSubmit={handleCreate}>
-            <input
-              className="input input-bordered"
+            <Input
               placeholder="Lot UID"
               value={form.lot_uid}
               onChange={(event) => setForm((prev) => ({ ...prev, lot_uid: event.target.value }))}
               required
             />
-            <input
-              className="input input-bordered"
+            <Input
               type="number"
               min={1}
               value={form.warehouse_id}
-              onChange={(event) =>
-                setForm((prev) => ({ ...prev, warehouse_id: Number(event.target.value) }))
-              }
+              onChange={(event) => setForm((prev) => ({ ...prev, warehouse_id: Number(event.target.value) }))}
               required
             />
-            <input
-              className="input input-bordered"
+            <Input
               type="date"
               value={form.storage_date}
               onChange={(event) => setForm((prev) => ({ ...prev, storage_date: event.target.value }))}
               required
             />
-            <select
-              className="select select-bordered"
+            <Select
               value={form.status}
               onChange={(event) => setForm((prev) => ({ ...prev, status: event.target.value }))}
             >
               <option value="conforme">conforme</option>
               <option value="alerte">alerte</option>
               <option value="perime">perime</option>
-            </select>
-            <button className="btn btn-primary md:col-span-4" type="submit">
-              Ajouter
-            </button>
+            </Select>
+            <Button className="md:col-span-4" type="submit">Ajouter</Button>
           </form>
-          {error ? <p className="text-error">{error}</p> : null}
-        </div>
-      </div>
+          {error ? <p className="mt-3 text-sm text-red-600">{error}</p> : null}
+        </CardContent>
+      </Card>
 
-      <div className="overflow-x-auto rounded-box bg-base-200 p-3">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Lot UID</th>
-              <th>Entrepot</th>
-              <th>Date stockage</th>
-              <th>Statut</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan={5}>Chargement...</td>
-              </tr>
-            ) : (
-              lots.map((lot) => (
-                <LotRow
-                  key={lot.id}
-                  lot={lot}
-                  editingUid={editingUid}
-                  onStartEdit={setEditingUid}
-                  onSave={handleUpdate}
-                  onDelete={handleDelete}
-                />
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+      <Card>
+        <CardContent className="pt-6">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Lot UID</TableHead>
+                <TableHead>Entrepot</TableHead>
+                <TableHead>Date stockage</TableHead>
+                <TableHead>Statut</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={5}>Chargement...</TableCell>
+                </TableRow>
+              ) : (
+                lots.map((lot) => (
+                  <LotRow
+                    key={lot.id}
+                    lot={lot}
+                    editingUid={editingUid}
+                    onStartEdit={setEditingUid}
+                    onSave={handleUpdate}
+                    onDelete={handleDelete}
+                  />
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
   );
 }
@@ -186,50 +187,35 @@ function LotRow({ lot, editingUid, onStartEdit, onSave, onDelete }: LotRowProps)
   const isEditing = editingUid === lot.lot_uid;
 
   return (
-    <tr>
-      <td>{lot.lot_uid}</td>
-      <td>{lot.warehouse_id}</td>
-      <td>
+    <TableRow>
+      <TableCell>{lot.lot_uid}</TableCell>
+      <TableCell>{lot.warehouse_id}</TableCell>
+      <TableCell>
         {isEditing ? (
-          <input
-            className="input input-bordered input-sm"
-            type="date"
-            value={editDate}
-            onChange={(event) => setEditDate(event.target.value)}
-          />
+          <Input type="date" value={editDate} onChange={(event) => setEditDate(event.target.value)} />
         ) : (
           lot.storage_date
         )}
-      </td>
-      <td>
+      </TableCell>
+      <TableCell>
         {isEditing ? (
-          <select
-            className="select select-bordered select-sm"
-            value={editStatus}
-            onChange={(event) => setEditStatus(event.target.value)}
-          >
+          <Select value={editStatus} onChange={(event) => setEditStatus(event.target.value)}>
             <option value="conforme">conforme</option>
             <option value="alerte">alerte</option>
             <option value="perime">perime</option>
-          </select>
+          </Select>
         ) : (
           lot.status
         )}
-      </td>
-      <td className="space-x-2">
+      </TableCell>
+      <TableCell className="space-x-2">
         {isEditing ? (
-          <button className="btn btn-xs btn-success" onClick={() => void onSave(lot.lot_uid, editStatus, editDate)}>
-            Sauver
-          </button>
+          <Button size="sm" onClick={() => void onSave(lot.lot_uid, editStatus, editDate)}>Sauver</Button>
         ) : (
-          <button className="btn btn-xs btn-info" onClick={() => onStartEdit(lot.lot_uid)}>
-            Modifier
-          </button>
+          <Button size="sm" variant="outline" onClick={() => onStartEdit(lot.lot_uid)}>Modifier</Button>
         )}
-        <button className="btn btn-xs btn-error" onClick={() => void onDelete(lot.lot_uid)}>
-          Supprimer
-        </button>
-      </td>
-    </tr>
+        <Button size="sm" variant="destructive" onClick={() => void onDelete(lot.lot_uid)}>Supprimer</Button>
+      </TableCell>
+    </TableRow>
   );
 }

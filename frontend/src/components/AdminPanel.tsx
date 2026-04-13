@@ -2,6 +2,11 @@
 
 import { FormEvent, useEffect, useState } from "react";
 
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { authClient } from "@/lib/auth-client";
 
 type UserRecord = {
@@ -62,46 +67,49 @@ export default function AdminPanel() {
   }
 
   return (
-    <main className="mx-auto max-w-5xl p-6 space-y-6">
+    <main className="mx-auto max-w-5xl space-y-6 p-6">
       <h1 className="text-3xl font-bold">Admin - Utilisateurs & Roles</h1>
-      <form className="card bg-base-200 shadow-sm" onSubmit={createUser}>
-        <div className="card-body grid gap-3 md:grid-cols-4">
-          <input className="input input-bordered" value={name} onChange={(e)=>setName(e.target.value)} placeholder="Nom" />
-          <input className="input input-bordered" value={email} onChange={(e)=>setEmail(e.target.value)} placeholder="Email" type="email" />
-          <input className="input input-bordered" value={password} onChange={(e)=>setPassword(e.target.value)} placeholder="Mot de passe" type="password" />
-            <select
-              className="select select-bordered"
-              value={role}
-              onChange={(e)=>setRole(e.target.value as "user" | "admin")}
-            >
-            <option value="user">user</option>
-            <option value="admin">admin</option>
-          </select>
-          <button className="btn btn-primary md:col-span-4" type="submit">Ajouter utilisateur</button>
-        </div>
-      </form>
+      <Card>
+        <CardHeader>
+          <CardTitle>Ajouter un utilisateur</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form className="grid gap-3 md:grid-cols-4" onSubmit={createUser}>
+            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nom" />
+            <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" type="email" />
+            <Input value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Mot de passe" type="password" />
+            <Select value={role} onChange={(e) => setRole(e.target.value as "user" | "admin")}>
+              <option value="user">user</option>
+              <option value="admin">admin</option>
+            </Select>
+            <Button className="md:col-span-4" type="submit">Ajouter utilisateur</Button>
+          </form>
+        </CardContent>
+      </Card>
 
-      {error ? <p className="text-error">{error}</p> : null}
+      {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
-      <div className="overflow-x-auto rounded-box bg-base-200 p-3">
-        <table className="table">
-          <thead><tr><th>Email</th><th>Nom</th><th>Role</th><th>Actions</th></tr></thead>
-          <tbody>
-            {users.map((user) => (
-              <tr key={user.id}>
-                <td>{user.email}</td>
-                <td>{user.name ?? "-"}</td>
-                <td>{user.role ?? "user"}</td>
-                <td className="space-x-2">
-                  <button className="btn btn-xs" onClick={() => void setUserRole(user.id, "user")}>Role user</button>
-                  <button className="btn btn-xs btn-secondary" onClick={() => void setUserRole(user.id, "admin")}>Role admin</button>
-                  <button className="btn btn-xs btn-error" onClick={() => void deleteUser(user.id)}>Supprimer</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <Card>
+        <CardContent className="pt-6">
+          <Table>
+            <TableHeader><TableRow><TableHead>Email</TableHead><TableHead>Nom</TableHead><TableHead>Role</TableHead><TableHead>Actions</TableHead></TableRow></TableHeader>
+            <TableBody>
+              {users.map((user) => (
+                <TableRow key={user.id}>
+                  <TableCell>{user.email}</TableCell>
+                  <TableCell>{user.name ?? "-"}</TableCell>
+                  <TableCell>{user.role ?? "user"}</TableCell>
+                  <TableCell className="space-x-2">
+                    <Button size="sm" variant="outline" onClick={() => void setUserRole(user.id, "user")}>Role user</Button>
+                    <Button size="sm" variant="secondary" onClick={() => void setUserRole(user.id, "admin")}>Role admin</Button>
+                    <Button size="sm" variant="destructive" onClick={() => void deleteUser(user.id)}>Supprimer</Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </main>
   );
 }

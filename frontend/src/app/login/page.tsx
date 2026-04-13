@@ -3,6 +3,9 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 
 export default function LoginPage() {
@@ -34,18 +37,20 @@ export default function LoginPage() {
 
   return (
     <main className="mx-auto max-w-md p-6">
-      <div className="card bg-base-200 shadow-sm">
-        <div className="card-body">
-          <h1 className="card-title">Connexion Siege</h1>
+      <Card>
+        <CardHeader>
+          <CardTitle>Connexion Siege</CardTitle>
+        </CardHeader>
+        <CardContent>
           <form className="space-y-3" onSubmit={handleSubmit}>
-            <input className="input input-bordered w-full" type="email" value={email} onChange={(e)=>setEmail(e.target.value)} />
-            <input className="input input-bordered w-full" type="password" value={password} onChange={(e)=>setPassword(e.target.value)} />
-            <button className="btn btn-primary w-full" type="submit">Se connecter</button>
+            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+            <Button className="w-full" type="submit">Se connecter</Button>
           </form>
-          {error ? <p className="text-error text-sm">{error}</p> : null}
-          <p className="text-xs opacity-70">Compte demo: admin@futurekawa.local / Admin123!</p>
-        </div>
-      </div>
+          {error ? <p className="mt-3 text-sm text-red-600">{error}</p> : null}
+          <p className="mt-3 text-xs text-zinc-500">Compte demo: admin@futurekawa.local / Admin123!</p>
+        </CardContent>
+      </Card>
     </main>
   );
 }

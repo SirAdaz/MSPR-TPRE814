@@ -1,10 +1,11 @@
-import "./globals.css";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { headers } from "next/headers";
-import type { ReactNode } from "react";
 
-import { auth } from "@/lib/auth";
 import { LogoutButton } from "@/components/LogoutButton";
+import { Button } from "@/components/ui/button";
+import { auth } from "@/lib/auth";
+import "./globals.css";
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -13,31 +14,23 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
 
   return (
     <html lang="fr">
-      <body className="min-h-screen bg-base-100 text-base-content">
-        <header className="border-b border-base-300 bg-base-100">
+      <body className="min-h-screen bg-[#f8f5f2] text-zinc-900">
+        <header className="border-b border-zinc-200 bg-white">
           <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-4">
-            <div>
-              <Link className="text-lg font-semibold tracking-tight" href="/">
-                FutureKawa
-              </Link>
-            </div>
+            <Link className="text-lg font-semibold tracking-tight" href="/">
+              FutureKawa
+            </Link>
             <div className="flex items-center gap-2">
               {session ? (
                 <>
-                  <Link className="btn btn-ghost btn-sm" href="/admin">
-                    Panel Admin
-                  </Link>
+                  <Link href="/admin"><Button size="sm" variant="ghost">Panel Admin</Button></Link>
                   <LogoutButton />
-                  <div className="avatar online placeholder" title={email}>
-                    <div className="flex w-8 items-center justify-center rounded-full bg-neutral text-neutral-content">
-                      <span className="text-xs font-bold leading-none">{initial}</span>
-                    </div>
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-900 text-xs font-semibold text-white" title={email}>
+                    {initial}
                   </div>
                 </>
               ) : (
-                <Link className="btn btn-primary btn-sm" href="/login">
-                  Connexion
-                </Link>
+                <Link href="/login"><Button size="sm">Connexion</Button></Link>
               )}
             </div>
           </div>

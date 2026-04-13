@@ -1,5 +1,6 @@
 import { ReadingChart } from "@/components/ReadingChart";
 import { PageHeaderNav } from "@/components/PageHeaderNav";
+import { Card, CardContent } from "@/components/ui/card";
 import { CountryCode } from "@/lib/countries";
 import { requireSession } from "@/lib/server-auth";
 import { fetchJson } from "@/lib/client";
@@ -27,9 +28,11 @@ export default async function LotDetailPage({ params }: Props) {
         ]}
       />
       <h1 className="text-3xl font-bold">Lot {lotId} - {countryId}</h1>
-      <div className="mt-6 rounded-box bg-base-200 p-4">
-        <ReadingChart readings={readings} />
-      </div>
+      <Card className="mt-6">
+        <CardContent className="pt-6">
+          <ReadingChart readings={readings} />
+        </CardContent>
+      </Card>
     </main>
   );
 }
