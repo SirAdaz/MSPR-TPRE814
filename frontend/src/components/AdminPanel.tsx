@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
+import { Pencil, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,12 +17,27 @@ type UserRecord = {
   name?: string | null;
 };
 
+const ROLE_OPTIONS = [
+  { value: "responsable_exploitation_br", label: "Responsable d’exploitation (Brésil)" },
+  { value: "responsable_exploitation_ec", label: "Responsable d’exploitation (Équateur)" },
+  { value: "responsable_exploitation_co", label: "Responsable d’exploitation (Colombie)" },
+  { value: "responsable_entrepot", label: "Responsable d’entrepôt" },
+  { value: "equipe_qualite", label: "Équipe Qualité" },
+  { value: "equipe_supply_chain", label: "Équipe Supply Chain" },
+  { value: "siege", label: "Siège" },
+  { value: "admin", label: "Admin" },
+] as const;
+
 export default function AdminPanel() {
   const [users, setUsers] = useState<UserRecord[]>([]);
   const [email, setEmail] = useState("user@futurekawa.local");
   const [password, setPassword] = useState("User123!");
   const [name, setName] = useState("Nouveau User");
-  const [role, setRole] = useState<"user" | "admin">("user");
+  const [role, setRole] = useState<string>("siege");
+  const [editingUserId, setEditingUserId] = useState<string | null>(null);
+  const [editEmail, setEditEmail] = useState("");
+  const [editName, setEditName] = useState("");
+  const [editRole, setEditRole] = useState<string>("siege");
   const [error, setError] = useState<string | null>(null);
 
   async function refreshUsers() {
@@ -40,11 +56,25 @@ export default function AdminPanel() {
   async function createUser(event: FormEvent) {
     event.preventDefault();
     setError(null);
-    const result = await authClient.admin.createUser({ email, password, name, role });
+    const accessRole: "user" | "admin" = role === "admin" ? "admin" : "user";
+    const result = await authClient.admin.createUser({ email, password, name, role: accessRole });
     if (result.error) {
       setError(result.error.message ?? "Creation impossible");
       return;
     }
+    if (result.data?.user?.id && role !== accessRole) {
+      const customRoleResult = await authClient.admin.updateUser({
+        userId: result.data.user.id,
+        data: { role },
+      });
+      if (customRoleResult.error) {
+        setError(customRoleResult.error.message ?? "Mise a jour du role metier impossible");
+      }
+    }
+    setEmail("user@futurekawa.local");
+    setPassword("User123!");
+    setName("Nouveau User");
+    setRole("siege");
     await refreshUsers();
   }
 
@@ -57,13 +87,48 @@ export default function AdminPanel() {
     await refreshUsers();
   }
 
-  async function setUserRole(userId: string, newRole: "user" | "admin") {
-    const result = await authClient.admin.setRole({ userId, role: newRole });
-    if (result.error) {
-      setError(result.error.message ?? "Modification role impossible");
+  function startEdit(user: UserRecord) {
+    setEditingUserId(user.id);
+    setEditEmail(user.email);
+    setEditName(user.name ?? "");
+    setEditRole(user.role ?? "siege");
+  }
+
+  function cancelEdit() {
+    setEditingUserId(null);
+    setEditEmail("");
+    setEditName("");
+    setEditRole("siege");
+  }
+
+  async function saveEdit(userId: string) {
+    setError(null);
+    const accessRole: "user" | "admin" = editRole === "admin" ? "admin" : "user";
+    const accessRoleResult = await authClient.admin.setRole({ userId, role: accessRole });
+    if (accessRoleResult.error) {
+      setError(accessRoleResult.error.message ?? "Mise a jour du role d'acces impossible");
       return;
     }
+
+    const updateResult = await authClient.admin.updateUser({
+      userId,
+      data: { email: editEmail, name: editName, role: editRole },
+    });
+    if (updateResult.error) {
+      setError(updateResult.error.message ?? "Mise a jour impossible");
+      return;
+    }
+
+    cancelEdit();
     await refreshUsers();
+  }
+
+  async function handleDelete(userId: string) {
+    const confirmed = window.confirm("Etes-vous sur de vouloir supprimer cet utilisateur ?");
+    if (!confirmed) {
+      return;
+    }
+    await deleteUser(userId);
   }
 
   return (
@@ -78,9 +143,12 @@ export default function AdminPanel() {
             <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nom" />
             <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" type="email" />
             <Input value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Mot de passe" type="password" />
-            <Select value={role} onChange={(e) => setRole(e.target.value as "user" | "admin")}>
-              <option value="user">user</option>
-              <option value="admin">admin</option>
+            <Select value={role} onChange={(e) => setRole(e.target.value)}>
+              {ROLE_OPTIONS.map((roleOption) => (
+                <option key={roleOption.value} value={roleOption.value}>
+                  {roleOption.label}
+                </option>
+              ))}
             </Select>
             <Button className="md:col-span-4" type="submit">Ajouter utilisateur</Button>
           </form>
@@ -96,13 +164,49 @@ export default function AdminPanel() {
             <TableBody>
               {users.map((user) => (
                 <TableRow key={user.id}>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>{user.name ?? "-"}</TableCell>
-                  <TableCell>{user.role ?? "user"}</TableCell>
+                  <TableCell>
+                    {editingUserId === user.id ? (
+                      <Input value={editEmail} onChange={(e) => setEditEmail(e.target.value)} type="email" />
+                    ) : (
+                      user.email
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {editingUserId === user.id ? (
+                      <Input value={editName} onChange={(e) => setEditName(e.target.value)} />
+                    ) : (
+                      user.name ?? "-"
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {editingUserId === user.id ? (
+                      <Select value={editRole} onChange={(e) => setEditRole(e.target.value)}>
+                        {ROLE_OPTIONS.map((roleOption) => (
+                          <option key={roleOption.value} value={roleOption.value}>
+                            {roleOption.label}
+                          </option>
+                        ))}
+                      </Select>
+                    ) : (
+                      ROLE_OPTIONS.find((item) => item.value === (user.role ?? "siege"))?.label ?? (user.role ?? "siege")
+                    )}
+                  </TableCell>
                   <TableCell className="space-x-2">
-                    <Button size="sm" variant="outline" onClick={() => void setUserRole(user.id, "user")}>Role user</Button>
-                    <Button size="sm" variant="secondary" onClick={() => void setUserRole(user.id, "admin")}>Role admin</Button>
-                    <Button size="sm" variant="destructive" onClick={() => void deleteUser(user.id)}>Supprimer</Button>
+                    {editingUserId === user.id ? (
+                      <>
+                        <Button size="sm" onClick={() => void saveEdit(user.id)}>Enregistrer</Button>
+                        <Button size="sm" variant="outline" onClick={cancelEdit}>Annuler</Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button size="sm" variant="outline" onClick={() => startEdit(user)} aria-label="Modifier">
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                      </>
+                    )}
+                    <Button size="sm" variant="destructive" onClick={() => void handleDelete(user.id)} aria-label="Supprimer">
+                      <X className="h-4 w-4" />
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
