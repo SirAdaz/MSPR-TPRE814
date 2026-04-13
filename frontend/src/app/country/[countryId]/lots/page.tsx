@@ -1,12 +1,14 @@
 import { CountryLotsManager } from "@/components/CountryLotsManager";
 import { PageHeaderNav } from "@/components/PageHeaderNav";
 import { CountryCode } from "@/lib/countries";
+import { requireSession } from "@/lib/server-auth";
 
 interface Props {
   params: Promise<{ countryId: CountryCode }>;
 }
 
 export default async function LotsPage({ params }: Props) {
+  await requireSession();
   const { countryId } = await params;
 
   return (

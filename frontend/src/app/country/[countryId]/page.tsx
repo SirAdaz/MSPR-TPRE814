@@ -2,12 +2,14 @@ import Link from "next/link";
 
 import { PageHeaderNav } from "@/components/PageHeaderNav";
 import { CountryCode } from "@/lib/countries";
+import { requireSession } from "@/lib/server-auth";
 
 interface Props {
   params: Promise<{ countryId: CountryCode }>;
 }
 
 export default async function CountryPage({ params }: Props) {
+  await requireSession();
   const { countryId } = await params;
 
   return (

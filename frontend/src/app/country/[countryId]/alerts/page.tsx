@@ -1,4 +1,5 @@
-import { CountryCode, countryApiMap } from "@/lib/countries";
+import { CountryCode } from "@/lib/countries";
+import { requireSession } from "@/lib/server-auth";
 import { fetchJson } from "@/lib/client";
 import { Alert } from "@/types";
 import { PageHeaderNav } from "@/components/PageHeaderNav";
@@ -8,9 +9,9 @@ interface Props {
 }
 
 export default async function AlertsPage({ params }: Props) {
+  await requireSession();
   const { countryId } = await params;
-  const baseUrl = countryApiMap[countryId] ?? countryApiMap.BR;
-  const alerts = await fetchJson<Alert[]>(`${baseUrl}/api/v1/alerts`);
+  const alerts = await fetchJson<Alert[]>(`/api/countries/${countryId}/alerts`);
 
   return (
     <main className="mx-auto max-w-4xl p-6">

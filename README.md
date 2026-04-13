@@ -23,6 +23,15 @@ Hot reload est actif:
 - OpenAPI JSON: `http://localhost:8001/openapi.json`
 - ReDoc: `http://localhost:8001/redoc`
 
+## Authentification et securite
+- Login Siege: `http://localhost:3000/login`
+- Admin: `http://localhost:3000/admin`
+- Better Auth stocke users/sessions en PostgreSQL.
+- Pages pays/admin protegees (redirection vers login sans session).
+- APIs pays protegees par cle API:
+  - Header front siege: `X-Frontend-Key`
+  - Header capteur IoT (ecriture mesures): `X-Sensor-Key`
+
 ## Arborescence
 - `frontend/` : application Next.js du siege
 - `backend/` : API FastAPI reutilisable pour chaque pays

@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.core.db import get_db
+from app.core.security import require_frontend_key
 from app.models import Lot
 from app.schemas.entities import LotCreate, LotOut, LotUpdate
 
@@ -9,7 +10,11 @@ router = APIRouter()
 
 
 @router.post("/lots", response_model=LotOut)
-def create_lot(payload: LotCreate, db: Session = Depends(get_db)):
+def create_lot(
+    payload: LotCreate,
+    db: Session = Depends(get_db),
+    _: None = Depends(require_frontend_key),
+):
     lot = Lot(**payload.model_dump())
     db.add(lot)
     db.commit()
@@ -22,6 +27,7 @@ def list_lots(
     sort: str = Query("storage_date"),
     order: str = Query("asc"),
     db: Session = Depends(get_db),
+    _: None = Depends(require_frontend_key),
 ):
     if sort != "storage_date":
         raise HTTPException(status_code=400, detail="Unsupported sort")
@@ -31,7 +37,11 @@ def list_lots(
 
 
 @router.get("/lots/{lot_uid}", response_model=LotOut)
-def get_lot(lot_uid: str, db: Session = Depends(get_db)):
+def get_lot(
+    lot_uid: str,
+    db: Session = Depends(get_db),
+    _: None = Depends(require_frontend_key),
+):
     lot = db.query(Lot).filter(Lot.lot_uid == lot_uid).first()
     if not lot:
         raise HTTPException(status_code=404, detail="Lot not found")
@@ -39,7 +49,12 @@ def get_lot(lot_uid: str, db: Session = Depends(get_db)):
 
 
 @router.put("/lots/{lot_uid}", response_model=LotOut)
-def update_lot(lot_uid: str, payload: LotUpdate, db: Session = Depends(get_db)):
+def update_lot(
+    lot_uid: str,
+    payload: LotUpdate,
+    db: Session = Depends(get_db),
+    _: None = Depends(require_frontend_key),
+):
     lot = db.query(Lot).filter(Lot.lot_uid == lot_uid).first()
     if not lot:
         raise HTTPException(status_code=404, detail="Lot not found")
@@ -54,7 +69,11 @@ def update_lot(lot_uid: str, payload: LotUpdate, db: Session = Depends(get_db)):
 
 
 @router.delete("/lots/{lot_uid}")
-def delete_lot(lot_uid: str, db: Session = Depends(get_db)):
+def delete_lot(
+    lot_uid: str,
+    db: Session = Depends(get_db),
+    _: None = Depends(require_frontend_key),
+):
     lot = db.query(Lot).filter(Lot.lot_uid == lot_uid).first()
     if not lot:
         raise HTTPException(status_code=404, detail="Lot not found")

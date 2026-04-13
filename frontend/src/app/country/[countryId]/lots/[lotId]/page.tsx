@@ -1,6 +1,7 @@
 import { ReadingChart } from "@/components/ReadingChart";
 import { PageHeaderNav } from "@/components/PageHeaderNav";
-import { CountryCode, countryApiMap } from "@/lib/countries";
+import { CountryCode } from "@/lib/countries";
+import { requireSession } from "@/lib/server-auth";
 import { fetchJson } from "@/lib/client";
 import { SensorReading } from "@/types";
 
@@ -9,9 +10,9 @@ interface Props {
 }
 
 export default async function LotDetailPage({ params }: Props) {
+  await requireSession();
   const { countryId, lotId } = await params;
-  const baseUrl = countryApiMap[countryId] ?? countryApiMap.BR;
-  const readings = await fetchJson<SensorReading[]>(`${baseUrl}/api/v1/readings?warehouse_id=1`);
+  const readings = await fetchJson<SensorReading[]>(`/api/countries/${countryId}/readings?warehouse_id=1`);
 
   return (
     <main className="mx-auto max-w-4xl p-6">

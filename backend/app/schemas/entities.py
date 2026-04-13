@@ -60,6 +60,12 @@ class SensorReadingOut(BaseModel):
         from_attributes = True
 
 
+class SensorReadingCreate(BaseModel):
+    warehouse_id: int
+    temperature: float
+    humidity: float
+
+
 class AlertOut(BaseModel):
     id: int
     warehouse_id: int

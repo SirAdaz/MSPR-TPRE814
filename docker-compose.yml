@@ -24,6 +24,8 @@ services:
       ENABLE_SCHEDULER: "false"
       ENABLE_MQTT: "false"
       DATABASE_URL: postgresql://futurekawa:futurekawa@postgres-br:5432/futurekawa_br
+      FRONTEND_API_KEY: front-dev-key
+      SENSOR_API_KEY: sensor-dev-key
       MQTT_HOST: mosquitto-br
       MQTT_PORT: 1883
       SMTP_HOST: mailhog
@@ -51,6 +53,11 @@ services:
       BACKEND_BR_URL: http://backend-br:8000
       BACKEND_EC_URL: http://backend-br:8000
       BACKEND_CO_URL: http://backend-br:8000
+      FRONTEND_API_KEY: front-dev-key
+      AUTH_DATABASE_URL: postgresql://futurekawa:futurekawa@postgres-br:5432/futurekawa_br
+      BETTER_AUTH_SECRET: dev-better-auth-secret-32-characters-minimum!
+      BETTER_AUTH_URL: http://localhost:3000
+      DEFAULT_ADMIN_EMAIL: admin@futurekawa.local
     depends_on:
       - backend-br
     ports:

@@ -4,8 +4,9 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.core.db import get_db
+from app.core.security import require_frontend_key, require_sensor_key
 from app.models import SensorReading
-from app.schemas.entities import SensorReadingOut
+from app.schemas.entities import SensorReadingCreate, SensorReadingOut
 
 router = APIRouter()
 
@@ -16,6 +17,7 @@ def list_readings(
     from_ts: datetime | None = Query(default=None, alias="from"),
     to_ts: datetime | None = Query(default=None, alias="to"),
     db: Session = Depends(get_db),
+    _: None = Depends(require_frontend_key),
 ):
     query = db.query(SensorReading).filter(SensorReading.warehouse_id == warehouse_id)
     if from_ts is not None:
@@ -23,3 +25,16 @@ def list_readings(
     if to_ts is not None:
         query = query.filter(SensorReading.recorded_at <= to_ts)
     return query.order_by(SensorReading.recorded_at.asc()).all()
+
+
+@router.post("/readings", response_model=SensorReadingOut)
+def create_reading(
+    payload: SensorReadingCreate,
+    db: Session = Depends(get_db),
+    _: None = Depends(require_sensor_key),
+):
+    reading = SensorReading(**payload.model_dump())
+    db.add(reading)
+    db.commit()
+    db.refresh(reading)
+    return reading

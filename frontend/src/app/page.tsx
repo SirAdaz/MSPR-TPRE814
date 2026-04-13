@@ -32,6 +32,11 @@ export default function HomePage() {
           </div>
         ))}
       </section>
+      <div className="mt-8">
+        <Link className="btn btn-secondary" href="/admin">
+          Panel Admin
+        </Link>
+      </div>
     </main>
   );
 }
