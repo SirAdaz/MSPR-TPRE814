@@ -26,6 +26,8 @@ def create_lot(
 def list_lots(
     sort: str = Query("storage_date"),
     order: str = Query("asc"),
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
     db: Session = Depends(get_db),
     _: None = Depends(require_frontend_key),
 ):
@@ -33,6 +35,7 @@ def list_lots(
         raise HTTPException(status_code=400, detail="Unsupported sort")
     query = db.query(Lot)
     query = query.order_by(Lot.storage_date.asc() if order == "asc" else Lot.storage_date.desc())
+    query = query.offset(offset).limit(limit)
     return query.all()
 
 

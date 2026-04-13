@@ -1,4 +1,7 @@
+import Link from "next/link";
+
 import { PageHeaderNav } from "@/components/PageHeaderNav";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CountryCode } from "@/lib/countries";
@@ -8,12 +11,23 @@ import { Alert } from "@/types";
 
 interface Props {
   params: Promise<{ countryId: CountryCode }>;
+  searchParams: Promise<{ page?: string }>;
 }
 
-export default async function AlertsPage({ params }: Props) {
+const PAGE_SIZE = 10;
+
+export default async function AlertsPage({ params, searchParams }: Props) {
   await requireSession();
   const { countryId } = await params;
-  const alerts = await fetchJson<Alert[]>(`/api/countries/${countryId}/alerts`);
+  const query = await searchParams;
+  const parsedPage = Number(query.page ?? "1");
+  const page = Number.isFinite(parsedPage) && parsedPage > 0 ? Math.floor(parsedPage) : 1;
+  const offset = (page - 1) * PAGE_SIZE;
+  const fetchedAlerts = await fetchJson<Alert[]>(
+    `/api/countries/${countryId}/alerts?limit=${PAGE_SIZE + 1}&offset=${offset}`,
+  );
+  const hasNextPage = fetchedAlerts.length > PAGE_SIZE;
+  const alerts = fetchedAlerts.slice(0, PAGE_SIZE);
 
   return (
     <main className="mx-auto max-w-4xl p-6">
@@ -39,6 +53,20 @@ export default async function AlertsPage({ params }: Props) {
             <CardContent>{alert.message}</CardContent>
           </Card>
         ))}
+        {alerts.length === 0 ? <p className="text-sm text-zinc-600">Aucune alerte sur cette page.</p> : null}
+      </div>
+      <div className="mt-6 flex items-center justify-end gap-2">
+        <Link href={`/country/${countryId}/alerts?page=${Math.max(1, page - 1)}`}>
+          <Button size="sm" variant="outline" disabled={page <= 1}>
+            Precedent
+          </Button>
+        </Link>
+        <span className="text-sm text-zinc-600">Page {page}</span>
+        <Link href={`/country/${countryId}/alerts?page=${page + 1}`}>
+          <Button size="sm" variant="outline" disabled={!hasNextPage}>
+            Suivant
+          </Button>
+        </Link>
       </div>
     </main>
   );

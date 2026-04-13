@@ -20,6 +20,7 @@ type LotForm = {
   storage_date: string;
   status: string;
 };
+const PAGE_SIZE = 10;
 
 const initialForm: LotForm = {
   lot_uid: "",
@@ -33,6 +34,8 @@ export function CountryLotsManager({ countryId }: Props) {
   const [loading, setLoading] = useState(true);
   const [editingUid, setEditingUid] = useState<string | null>(null);
   const [lotUidToDelete, setLotUidToDelete] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
+  const [hasNextPage, setHasNextPage] = useState(false);
   const [form, setForm] = useState<LotForm>(initialForm);
   const [error, setError] = useState<string | null>(null);
 
@@ -40,9 +43,14 @@ export function CountryLotsManager({ countryId }: Props) {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`/api/countries/${countryId}/lots`, { cache: "no-store" });
+      const offset = page * PAGE_SIZE;
+      const response = await fetch(
+        `/api/countries/${countryId}/lots?limit=${PAGE_SIZE + 1}&offset=${offset}&sort=storage_date&order=asc`,
+        { cache: "no-store" },
+      );
       const data = (await response.json()) as Lot[];
-      setLots(data);
+      setHasNextPage(data.length > PAGE_SIZE);
+      setLots(data.slice(0, PAGE_SIZE));
     } catch {
       setError("Impossible de charger les lots.");
     } finally {
@@ -52,7 +60,7 @@ export function CountryLotsManager({ countryId }: Props) {
 
   useEffect(() => {
     void loadLots();
-  }, [countryId]);
+  }, [countryId, page]);
 
   async function handleCreate(event: FormEvent) {
     event.preventDefault();
@@ -67,7 +75,11 @@ export function CountryLotsManager({ countryId }: Props) {
       return;
     }
     setForm(initialForm);
-    await loadLots();
+    if (page === 0) {
+      await loadLots();
+      return;
+    }
+    setPage(0);
   }
 
   async function handleDelete(lotUid: string) {
@@ -77,6 +89,10 @@ export function CountryLotsManager({ countryId }: Props) {
     });
     if (!response.ok) {
       setError("Suppression echouee.");
+      return;
+    }
+    if (page > 0 && lots.length === 1) {
+      setPage((prev) => prev - 1);
       return;
     }
     await loadLots();
@@ -177,6 +193,15 @@ export function CountryLotsManager({ countryId }: Props) {
               )}
             </TableBody>
           </Table>
+          <div className="mt-4 flex items-center justify-end gap-2">
+            <Button size="sm" variant="outline" disabled={page === 0} onClick={() => setPage((prev) => prev - 1)}>
+              Precedent
+            </Button>
+            <span className="text-sm text-zinc-600">Page {page + 1}</span>
+            <Button size="sm" variant="outline" disabled={!hasNextPage} onClick={() => setPage((prev) => prev + 1)}>
+              Suivant
+            </Button>
+          </div>
         </CardContent>
       </Card>
       {lotUidToDelete ? (

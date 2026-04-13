@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.core.db import get_db
@@ -11,7 +11,9 @@ router = APIRouter()
 
 @router.get("/alerts", response_model=list[AlertOut])
 def list_alerts(
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
     db: Session = Depends(get_db),
     _: None = Depends(require_frontend_key),
 ):
-    return db.query(Alert).order_by(Alert.created_at.desc()).all()
+    return db.query(Alert).order_by(Alert.created_at.desc()).offset(offset).limit(limit).all()

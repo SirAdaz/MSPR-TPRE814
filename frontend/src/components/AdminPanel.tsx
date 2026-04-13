@@ -27,6 +27,7 @@ const ROLE_OPTIONS = [
   { value: "siege", label: "Siège" },
   { value: "admin", label: "Admin" },
 ] as const;
+const PAGE_SIZE = 10;
 
 export default function AdminPanel() {
   const [users, setUsers] = useState<UserRecord[]>([]);
@@ -39,20 +40,26 @@ export default function AdminPanel() {
   const [editName, setEditName] = useState("");
   const [editRole, setEditRole] = useState<string>("siege");
   const [userIdToDelete, setUserIdToDelete] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
+  const [hasNextPage, setHasNextPage] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function refreshUsers() {
-    const result = await authClient.admin.listUsers({ query: { limit: 100 } });
+    const result = await authClient.admin.listUsers({
+      query: { limit: PAGE_SIZE + 1, offset: page * PAGE_SIZE },
+    });
     if (result.error) {
       setError(result.error.message ?? "Impossible de charger les users");
       return;
     }
-    setUsers((result.data?.users ?? []) as UserRecord[]);
+    const allUsers = (result.data?.users ?? []) as UserRecord[];
+    setHasNextPage(allUsers.length > PAGE_SIZE);
+    setUsers(allUsers.slice(0, PAGE_SIZE));
   }
 
   useEffect(() => {
     void refreshUsers();
-  }, []);
+  }, [page]);
 
   async function createUser(event: FormEvent) {
     event.preventDefault();
@@ -76,7 +83,11 @@ export default function AdminPanel() {
     setPassword("User123!");
     setName("Nouveau User");
     setRole("siege");
-    await refreshUsers();
+    if (page === 0) {
+      await refreshUsers();
+      return;
+    }
+    setPage(0);
   }
 
   async function deleteUser(userId: string) {
@@ -213,6 +224,15 @@ export default function AdminPanel() {
               ))}
             </TableBody>
           </Table>
+          <div className="mt-4 flex items-center justify-end gap-2">
+            <Button size="sm" variant="outline" disabled={page === 0} onClick={() => setPage((prev) => prev - 1)}>
+              Precedent
+            </Button>
+            <span className="text-sm text-zinc-600">Page {page + 1}</span>
+            <Button size="sm" variant="outline" disabled={!hasNextPage} onClick={() => setPage((prev) => prev + 1)}>
+              Suivant
+            </Button>
+          </div>
         </CardContent>
       </Card>
       {userIdToDelete ? (
