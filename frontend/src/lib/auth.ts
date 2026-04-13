@@ -24,4 +24,8 @@ export const auth = betterAuth({
   plugins: [admin()],
   secret: process.env.BETTER_AUTH_SECRET ?? "change-me-dev-secret",
   baseURL: process.env.BETTER_AUTH_URL ?? "http://localhost:3000",
+  trustedOrigins: [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+  ],
 });
