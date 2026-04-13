@@ -1,10 +1,12 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { PageHeaderNav } from "@/components/PageHeaderNav";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CountryCode } from "@/lib/countries";
+import { canAccessAlerts } from "@/lib/permissions";
 import { requireSession } from "@/lib/server-auth";
 import { fetchJson } from "@/lib/client";
 import { Alert } from "@/types";
@@ -17,8 +19,12 @@ interface Props {
 const PAGE_SIZE = 10;
 
 export default async function AlertsPage({ params, searchParams }: Props) {
-  await requireSession();
+  const session = await requireSession();
   const { countryId } = await params;
+  const role = session.user?.role ?? "user";
+  if (!canAccessAlerts(role, countryId)) {
+    redirect(`/country/${countryId}`);
+  }
   const query = await searchParams;
   const parsedPage = Number(query.page ?? "1");
   const page = Number.isFinite(parsedPage) && parsedPage > 0 ? Math.floor(parsedPage) : 1;

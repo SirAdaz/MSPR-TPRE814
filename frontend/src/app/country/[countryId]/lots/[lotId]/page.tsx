@@ -1,7 +1,10 @@
+import { redirect } from "next/navigation";
+
 import { ReadingChart } from "@/components/ReadingChart";
 import { PageHeaderNav } from "@/components/PageHeaderNav";
 import { Card, CardContent } from "@/components/ui/card";
 import { CountryCode } from "@/lib/countries";
+import { canAccessLots } from "@/lib/permissions";
 import { requireSession } from "@/lib/server-auth";
 import { fetchJson } from "@/lib/client";
 import { SensorReading } from "@/types";
@@ -11,8 +14,12 @@ interface Props {
 }
 
 export default async function LotDetailPage({ params }: Props) {
-  await requireSession();
+  const session = await requireSession();
   const { countryId, lotId } = await params;
+  const role = session.user?.role ?? "user";
+  if (!canAccessLots(role, countryId)) {
+    redirect(`/country/${countryId}`);
+  }
   const readings = await fetchJson<SensorReading[]>(`/api/countries/${countryId}/readings?warehouse_id=1`);
 
   return (

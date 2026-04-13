@@ -5,12 +5,15 @@ import { headers } from "next/headers";
 import { LogoutButton } from "@/components/LogoutButton";
 import { Button } from "@/components/ui/button";
 import { auth } from "@/lib/auth";
+import { canAccessAdmin } from "@/lib/permissions";
 import "./globals.css";
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const session = await auth.api.getSession({ headers: await headers() });
   const email = session?.user?.email ?? "";
+  const role = session?.user?.role ?? "user";
   const initial = email ? email[0].toUpperCase() : "";
+  const showAdmin = canAccessAdmin(role, email);
 
   return (
     <html lang="fr">
@@ -23,7 +26,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             <div className="flex items-center gap-2">
               {session ? (
                 <>
-                  <Link href="/admin"><Button size="sm" variant="ghost">Panel Admin</Button></Link>
+                  {showAdmin ? <Link href="/admin"><Button size="sm" variant="ghost">Panel Admin</Button></Link> : null}
                   <LogoutButton />
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-900 text-xs font-semibold text-white" title={email}>
                     {initial}

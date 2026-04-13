@@ -1,6 +1,9 @@
+import { redirect } from "next/navigation";
+
 import { CountryLotsManager } from "@/components/CountryLotsManager";
 import { PageHeaderNav } from "@/components/PageHeaderNav";
 import { CountryCode } from "@/lib/countries";
+import { canAccessLots } from "@/lib/permissions";
 import { requireSession } from "@/lib/server-auth";
 
 interface Props {
@@ -8,8 +11,12 @@ interface Props {
 }
 
 export default async function LotsPage({ params }: Props) {
-  await requireSession();
+  const session = await requireSession();
   const { countryId } = await params;
+  const role = session.user?.role ?? "user";
+  if (!canAccessLots(role, countryId)) {
+    redirect(`/country/${countryId}`);
+  }
 
   return (
     <main className="mx-auto max-w-4xl p-6">
