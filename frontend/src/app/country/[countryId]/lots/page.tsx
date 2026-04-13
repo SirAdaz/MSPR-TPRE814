@@ -1,7 +1,6 @@
-import { LotList } from "@/components/LotList";
-import { CountryCode, countryApiMap } from "@/lib/countries";
-import { fetchJson } from "@/lib/client";
-import { Lot } from "@/types";
+import { CountryLotsManager } from "@/components/CountryLotsManager";
+import { PageHeaderNav } from "@/components/PageHeaderNav";
+import { CountryCode } from "@/lib/countries";
 
 interface Props {
   params: Promise<{ countryId: CountryCode }>;
@@ -9,14 +8,21 @@ interface Props {
 
 export default async function LotsPage({ params }: Props) {
   const { countryId } = await params;
-  const baseUrl = countryApiMap[countryId] ?? countryApiMap.BR;
-  const lots = await fetchJson<Lot[]>(`${baseUrl}/api/v1/lots?sort=storage_date&order=asc`);
 
   return (
     <main className="mx-auto max-w-4xl p-6">
+      <PageHeaderNav
+        backHref={`/country/${countryId}`}
+        backLabel={`Pays ${countryId}`}
+        items={[
+          { label: "Accueil", href: "/" },
+          { label: `Pays ${countryId}`, href: `/country/${countryId}` },
+          { label: "Lots" },
+        ]}
+      />
       <h1 className="text-3xl font-bold">Lots - {countryId}</h1>
       <div className="mt-6">
-        <LotList lots={lots} />
+        <CountryLotsManager countryId={countryId} />
       </div>
     </main>
   );

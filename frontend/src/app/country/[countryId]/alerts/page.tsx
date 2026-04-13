@@ -1,6 +1,7 @@
 import { CountryCode, countryApiMap } from "@/lib/countries";
 import { fetchJson } from "@/lib/client";
 import { Alert } from "@/types";
+import { PageHeaderNav } from "@/components/PageHeaderNav";
 
 interface Props {
   params: Promise<{ countryId: CountryCode }>;
@@ -13,6 +14,15 @@ export default async function AlertsPage({ params }: Props) {
 
   return (
     <main className="mx-auto max-w-4xl p-6">
+      <PageHeaderNav
+        backHref={`/country/${countryId}`}
+        backLabel={`Pays ${countryId}`}
+        items={[
+          { label: "Accueil", href: "/" },
+          { label: `Pays ${countryId}`, href: `/country/${countryId}` },
+          { label: "Alertes" },
+        ]}
+      />
       <h1 className="text-3xl font-bold">Alertes - {countryId}</h1>
       <ul className="mt-6 space-y-2">
         {alerts.map((alert) => (

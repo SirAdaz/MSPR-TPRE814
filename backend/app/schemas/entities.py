@@ -32,6 +32,12 @@ class LotCreate(BaseModel):
     status: str = "conforme"
 
 
+class LotUpdate(BaseModel):
+    warehouse_id: int | None = None
+    storage_date: date | None = None
+    status: str | None = None
+
+
 class LotOut(BaseModel):
     id: int
     lot_uid: str

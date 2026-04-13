@@ -9,10 +9,14 @@ Solution distribuee pour le suivi des stocks et conditions de stockage du cafe v
 - Tests: Jest, Cypress, pytest
 - CI/CD: Jenkins pipeline
 
-## Lancement rapide (demo)
+## Lancement rapide (dev par defaut)
 ```bash
-docker compose up --build
+docker compose up
 ```
+
+Hot reload est actif:
+- Frontend: `next dev`
+- Backend: `uvicorn --reload`
 
 ## Documentation API (Swagger)
 - Swagger UI: `http://localhost:8001/docs`
@@ -23,6 +27,5 @@ docker compose up --build
 - `frontend/` : application Next.js du siege
 - `backend/` : API FastAPI reutilisable pour chaque pays
 - `iot/` : prototype MicroPython pour capteur
-- `docker-compose.yml` : stack locale
-- `docker-compose.demo.yml` : extension 3 pays
+- `docker-compose.yml` : stack locale en mode developpement (hot reload)
 - `Jenkinsfile` : pipeline CI/CD

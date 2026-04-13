@@ -1,4 +1,5 @@
 import { ReadingChart } from "@/components/ReadingChart";
+import { PageHeaderNav } from "@/components/PageHeaderNav";
 import { CountryCode, countryApiMap } from "@/lib/countries";
 import { fetchJson } from "@/lib/client";
 import { SensorReading } from "@/types";
@@ -14,6 +15,16 @@ export default async function LotDetailPage({ params }: Props) {
 
   return (
     <main className="mx-auto max-w-4xl p-6">
+      <PageHeaderNav
+        backHref={`/country/${countryId}/lots`}
+        backLabel="Liste des lots"
+        items={[
+          { label: "Accueil", href: "/" },
+          { label: `Pays ${countryId}`, href: `/country/${countryId}` },
+          { label: "Lots", href: `/country/${countryId}/lots` },
+          { label: `Lot ${lotId}` },
+        ]}
+      />
       <h1 className="text-3xl font-bold">Lot {lotId} - {countryId}</h1>
       <div className="mt-6 rounded-box bg-base-200 p-4">
         <ReadingChart readings={readings} />

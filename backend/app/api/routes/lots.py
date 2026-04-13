@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.core.db import get_db
 from app.models import Lot
-from app.schemas.entities import LotCreate, LotOut
+from app.schemas.entities import LotCreate, LotOut, LotUpdate
 
 router = APIRouter()
 
@@ -36,3 +36,28 @@ def get_lot(lot_uid: str, db: Session = Depends(get_db)):
     if not lot:
         raise HTTPException(status_code=404, detail="Lot not found")
     return lot
+
+
+@router.put("/lots/{lot_uid}", response_model=LotOut)
+def update_lot(lot_uid: str, payload: LotUpdate, db: Session = Depends(get_db)):
+    lot = db.query(Lot).filter(Lot.lot_uid == lot_uid).first()
+    if not lot:
+        raise HTTPException(status_code=404, detail="Lot not found")
+
+    data = payload.model_dump(exclude_unset=True)
+    for field, value in data.items():
+        setattr(lot, field, value)
+
+    db.commit()
+    db.refresh(lot)
+    return lot
+
+
+@router.delete("/lots/{lot_uid}")
+def delete_lot(lot_uid: str, db: Session = Depends(get_db)):
+    lot = db.query(Lot).filter(Lot.lot_uid == lot_uid).first()
+    if not lot:
+        raise HTTPException(status_code=404, detail="Lot not found")
+    db.delete(lot)
+    db.commit()
+    return {"deleted": True, "lot_uid": lot_uid}
