@@ -38,6 +38,7 @@ export default function AdminPanel() {
   const [editEmail, setEditEmail] = useState("");
   const [editName, setEditName] = useState("");
   const [editRole, setEditRole] = useState<string>("siege");
+  const [userIdToDelete, setUserIdToDelete] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function refreshUsers() {
@@ -123,12 +124,12 @@ export default function AdminPanel() {
     await refreshUsers();
   }
 
-  async function handleDelete(userId: string) {
-    const confirmed = window.confirm("Etes-vous sur de vouloir supprimer cet utilisateur ?");
-    if (!confirmed) {
+  async function confirmDelete() {
+    if (!userIdToDelete) {
       return;
     }
-    await deleteUser(userId);
+    await deleteUser(userIdToDelete);
+    setUserIdToDelete(null);
   }
 
   return (
@@ -202,11 +203,11 @@ export default function AdminPanel() {
                         <Button size="sm" variant="outline" onClick={() => startEdit(user)} aria-label="Modifier">
                           <Pencil className="h-4 w-4" />
                         </Button>
+                        <Button size="sm" variant="destructive" onClick={() => setUserIdToDelete(user.id)} aria-label="Supprimer">
+                          <X className="h-4 w-4" />
+                        </Button>
                       </>
                     )}
-                    <Button size="sm" variant="destructive" onClick={() => void handleDelete(user.id)} aria-label="Supprimer">
-                      <X className="h-4 w-4" />
-                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -214,6 +215,28 @@ export default function AdminPanel() {
           </Table>
         </CardContent>
       </Card>
+      {userIdToDelete ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <CardTitle>Confirmer la suppression</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-zinc-600">
+                Etes-vous sur de vouloir supprimer cet utilisateur ? Cette action est irreversible.
+              </p>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setUserIdToDelete(null)}>
+                  Annuler
+                </Button>
+                <Button variant="destructive" onClick={() => void confirmDelete()}>
+                  Supprimer
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      ) : null}
     </main>
   );
 }

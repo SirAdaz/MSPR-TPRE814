@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
+import { Pencil, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,6 +32,7 @@ export function CountryLotsManager({ countryId }: Props) {
   const [lots, setLots] = useState<Lot[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingUid, setEditingUid] = useState<string | null>(null);
+  const [lotUidToDelete, setLotUidToDelete] = useState<string | null>(null);
   const [form, setForm] = useState<LotForm>(initialForm);
   const [error, setError] = useState<string | null>(null);
 
@@ -93,6 +95,14 @@ export function CountryLotsManager({ countryId }: Props) {
     }
     setEditingUid(null);
     await loadLots();
+  }
+
+  async function confirmDelete() {
+    if (!lotUidToDelete) {
+      return;
+    }
+    await handleDelete(lotUidToDelete);
+    setLotUidToDelete(null);
   }
 
   return (
@@ -161,7 +171,7 @@ export function CountryLotsManager({ countryId }: Props) {
                     editingUid={editingUid}
                     onStartEdit={setEditingUid}
                     onSave={handleUpdate}
-                    onDelete={handleDelete}
+                    onRequestDelete={setLotUidToDelete}
                   />
                 ))
               )}
@@ -169,6 +179,28 @@ export function CountryLotsManager({ countryId }: Props) {
           </Table>
         </CardContent>
       </Card>
+      {lotUidToDelete ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <CardTitle>Confirmer la suppression</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-zinc-600">
+                Etes-vous sur de vouloir supprimer ce lot ? Cette action est irreversible.
+              </p>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setLotUidToDelete(null)}>
+                  Annuler
+                </Button>
+                <Button variant="destructive" onClick={() => void confirmDelete()}>
+                  Supprimer
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -178,10 +210,10 @@ type LotRowProps = {
   editingUid: string | null;
   onStartEdit: (uid: string) => void;
   onSave: (lotUid: string, status: string, storageDate: string) => Promise<void>;
-  onDelete: (lotUid: string) => Promise<void>;
+  onRequestDelete: (lotUid: string) => void;
 };
 
-function LotRow({ lot, editingUid, onStartEdit, onSave, onDelete }: LotRowProps) {
+function LotRow({ lot, editingUid, onStartEdit, onSave, onRequestDelete }: LotRowProps) {
   const [editStatus, setEditStatus] = useState(lot.status);
   const [editDate, setEditDate] = useState(lot.storage_date);
   const isEditing = editingUid === lot.lot_uid;
@@ -212,9 +244,15 @@ function LotRow({ lot, editingUid, onStartEdit, onSave, onDelete }: LotRowProps)
         {isEditing ? (
           <Button size="sm" onClick={() => void onSave(lot.lot_uid, editStatus, editDate)}>Sauver</Button>
         ) : (
-          <Button size="sm" variant="outline" onClick={() => onStartEdit(lot.lot_uid)}>Modifier</Button>
+          <>
+            <Button size="sm" variant="outline" onClick={() => onStartEdit(lot.lot_uid)} aria-label="Modifier">
+              <Pencil className="h-4 w-4" />
+            </Button>
+            <Button size="sm" variant="destructive" onClick={() => onRequestDelete(lot.lot_uid)} aria-label="Supprimer">
+              <X className="h-4 w-4" />
+            </Button>
+          </>
         )}
-        <Button size="sm" variant="destructive" onClick={() => void onDelete(lot.lot_uid)}>Supprimer</Button>
       </TableCell>
     </TableRow>
   );
