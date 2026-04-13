@@ -1,0 +1,13 @@
+@import "tailwindcss";
+@plugin "daisyui";
+
+@plugin "daisyui/theme" {
+  name: "futurekawa";
+  default: true;
+  color-scheme: light;
+  --color-primary: #6f4e37;
+  --color-secondary: #3f6f53;
+  --color-accent: #e9c46a;
+  --color-neutral: #2d2a26;
+  --color-base-100: #f8f5f2;
+}
