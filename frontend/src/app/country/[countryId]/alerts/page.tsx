@@ -56,17 +56,25 @@ export default async function AlertsPage({ params, searchParams }: Props) {
         {alerts.length === 0 ? <p className="text-sm text-zinc-600">Aucune alerte sur cette page.</p> : null}
       </div>
       <div className="mt-6 flex items-center justify-end gap-2">
-        <Link href={`/country/${countryId}/alerts?page=${Math.max(1, page - 1)}`}>
-          <Button size="sm" variant="outline" disabled={page <= 1}>
+        {page <= 1 ? (
+          <Button size="sm" variant="outline" disabled>
             Precedent
           </Button>
-        </Link>
+        ) : (
+          <Link href={`/country/${countryId}/alerts?page=${page - 1}`}>
+            <Button size="sm" variant="outline">Precedent</Button>
+          </Link>
+        )}
         <span className="text-sm text-zinc-600">Page {page}</span>
-        <Link href={`/country/${countryId}/alerts?page=${page + 1}`}>
-          <Button size="sm" variant="outline" disabled={!hasNextPage}>
+        {!hasNextPage ? (
+          <Button size="sm" variant="outline" disabled>
             Suivant
           </Button>
-        </Link>
+        ) : (
+          <Link href={`/country/${countryId}/alerts?page=${page + 1}`}>
+            <Button size="sm" variant="outline">Suivant</Button>
+          </Link>
+        )}
       </div>
     </main>
   );
