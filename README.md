@@ -23,6 +23,21 @@ Hot reload est actif:
 - OpenAPI JSON: `http://localhost:8001/openapi.json`
 - ReDoc: `http://localhost:8001/redoc`
 
+## Lancer les tests dans Docker
+
+Depuis la racine du projet:
+
+```bash
+# Tests backend (pytest + coverage)
+docker compose run --rm backend-br sh -lc "pip install -r requirements.txt && PYTHONPATH=/app pytest -q"
+
+# Tests frontend (Jest + coverage)
+docker compose run --rm frontend sh -lc "npm install && npm run test:coverage"
+
+# Tests E2E frontend (Cypress)
+docker compose run --rm frontend sh -lc "npm install && npm run test:e2e"
+```
+
 ## Authentification et securite
 - Login Siege: `http://localhost:3000/login`
 - Admin: `http://localhost:3000/admin`

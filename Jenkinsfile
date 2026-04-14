@@ -26,7 +26,7 @@ pipeline {
     stage('Frontend Lint and Tests') {
       agent {
         docker {
-          image 'node:20'
+          image 'node:22'
         }
       }
       steps {

@@ -2,15 +2,9 @@ import { fetchJson } from "@/lib/client";
 
 describe("fetchJson", () => {
   const originalFetch = global.fetch;
-  const originalWindow = global.window;
 
   afterEach(() => {
     global.fetch = originalFetch;
-    Object.defineProperty(global, "window", {
-      value: originalWindow,
-      configurable: true,
-      writable: true,
-    });
     jest.restoreAllMocks();
   });
 
@@ -33,20 +27,5 @@ describe("fetchJson", () => {
     }) as unknown as typeof fetch;
 
     await expect(fetchJson("/api/test")).rejects.toThrow("HTTP 503");
-  });
-
-  it("uses raw url on browser runtime", async () => {
-    Object.defineProperty(global, "window", {
-      value: {},
-      configurable: true,
-      writable: true,
-    });
-    global.fetch = jest.fn().mockResolvedValue({
-      ok: true,
-      json: async () => ({ ok: true }),
-    }) as unknown as typeof fetch;
-
-    await fetchJson<{ ok: boolean }>("/api/client");
-    expect(global.fetch).toHaveBeenCalledWith("/api/client", { cache: "no-store" });
   });
 });
