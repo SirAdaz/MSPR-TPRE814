@@ -1,5 +1,9 @@
 pipeline {
   agent any
+  environment {
+    FRONTEND_COVERAGE_MIN = '80'
+    BACKEND_COVERAGE_MIN = '80'
+  }
 
   stages {
     stage('Checkout') {
@@ -15,7 +19,7 @@ pipeline {
         }
       }
       steps {
-        sh 'cd backend && pip install -r requirements.txt && pytest -q'
+        sh 'cd backend && pip install -r requirements.txt && pytest -q --cov-fail-under=$BACKEND_COVERAGE_MIN'
       }
     }
 
@@ -26,7 +30,7 @@ pipeline {
         }
       }
       steps {
-        sh 'cd frontend && npm install && npm run lint || true && npm test -- --passWithNoTests'
+        sh 'cd frontend && npm install && npm run lint && npm run test:coverage'
       }
     }
 
@@ -39,7 +43,7 @@ pipeline {
 
     stage('E2E (optional)') {
       steps {
-        sh 'cd frontend && npm run test:e2e || true'
+        sh 'cd frontend && npm run test:e2e'
       }
     }
   }
