@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from app.api.routes import alerts, exploitations, health, lots, readings, warehouses
 from app.core.bootstrap import init_db
 from app.core.config import settings
+from app.core.demo_data import ensure_demo_data
 from app.core.scheduler import scheduler
 from app.services.mqtt_listener import start_mqtt_listener, stop_mqtt_listener
 
@@ -12,6 +13,7 @@ from app.services.mqtt_listener import start_mqtt_listener, stop_mqtt_listener
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     init_db()
+    ensure_demo_data()
     if settings.enable_scheduler:
         scheduler.start()
     if settings.enable_mqtt:
