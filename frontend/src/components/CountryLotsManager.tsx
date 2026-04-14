@@ -128,34 +128,47 @@ export function CountryLotsManager({ countryId }: Props) {
           <CardTitle>Ajouter un lot</CardTitle>
         </CardHeader>
         <CardContent>
+          <p className="mb-3 text-xs text-zinc-500">Les champs avec <span className="text-red-600">*</span> sont obligatoires.</p>
           <form className="grid gap-3 md:grid-cols-4" onSubmit={handleCreate}>
-            <Input
-              placeholder="Lot UID"
-              value={form.lot_uid}
-              onChange={(event) => setForm((prev) => ({ ...prev, lot_uid: event.target.value }))}
-              required
-            />
-            <Input
-              type="number"
-              min={1}
-              value={form.warehouse_id}
-              onChange={(event) => setForm((prev) => ({ ...prev, warehouse_id: Number(event.target.value) }))}
-              required
-            />
-            <Input
-              type="date"
-              value={form.storage_date}
-              onChange={(event) => setForm((prev) => ({ ...prev, storage_date: event.target.value }))}
-              required
-            />
-            <Select
-              value={form.status}
-              onChange={(event) => setForm((prev) => ({ ...prev, status: event.target.value }))}
-            >
-              <option value="conforme">conforme</option>
-              <option value="alerte">alerte</option>
-              <option value="perime">perime</option>
-            </Select>
+            <label className="space-y-1 text-sm">
+              <span className="text-zinc-700">Lot UID <span className="text-red-600">*</span></span>
+              <Input
+                placeholder="Lot UID"
+                value={form.lot_uid}
+                onChange={(event) => setForm((prev) => ({ ...prev, lot_uid: event.target.value }))}
+                required
+              />
+            </label>
+            <label className="space-y-1 text-sm">
+              <span className="text-zinc-700">ID entrepot <span className="text-red-600">*</span></span>
+              <Input
+                type="number"
+                min={1}
+                value={form.warehouse_id}
+                onChange={(event) => setForm((prev) => ({ ...prev, warehouse_id: Number(event.target.value) }))}
+                required
+              />
+            </label>
+            <label className="space-y-1 text-sm">
+              <span className="text-zinc-700">Date de stockage <span className="text-red-600">*</span></span>
+              <Input
+                type="date"
+                value={form.storage_date}
+                onChange={(event) => setForm((prev) => ({ ...prev, storage_date: event.target.value }))}
+                required
+              />
+            </label>
+            <label className="space-y-1 text-sm">
+              <span className="text-zinc-700">Statut <span className="text-red-600">*</span></span>
+              <Select
+                value={form.status}
+                onChange={(event) => setForm((prev) => ({ ...prev, status: event.target.value }))}
+              >
+                <option value="conforme">conforme</option>
+                <option value="alerte">alerte</option>
+                <option value="perime">perime</option>
+              </Select>
+            </label>
             <Button className="md:col-span-4" type="submit">Ajouter</Button>
           </form>
           {error ? <p className="mt-3 text-sm text-red-600">{error}</p> : null}

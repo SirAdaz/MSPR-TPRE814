@@ -134,9 +134,10 @@ export function CountryWarehouseView({
             <CardTitle>Ajouter un entrepot</CardTitle>
           </CardHeader>
           <CardContent>
+            <p className="mb-3 text-xs text-zinc-500">Les champs avec <span className="text-red-600">*</span> sont obligatoires.</p>
             <form className="grid gap-3 md:grid-cols-2" onSubmit={handleCreateWarehouse}>
               <label className="space-y-1 text-sm">
-                <span className="text-zinc-700">Nom de l&apos;entrepot</span>
+                <span className="text-zinc-700">Nom de l&apos;entrepot <span className="text-red-600">*</span></span>
                 <Input
                   placeholder="Ex: Warehouse BR-C"
                   value={form.name}
@@ -145,7 +146,7 @@ export function CountryWarehouseView({
                 />
               </label>
               <label className="space-y-1 text-sm">
-                <span className="text-zinc-700">Temperature ideale (C)</span>
+                <span className="text-zinc-700">Temperature ideale (C) <span className="text-red-600">*</span></span>
                 <Input
                   type="number"
                   step="0.1"
@@ -156,7 +157,7 @@ export function CountryWarehouseView({
                 />
               </label>
               <label className="space-y-1 text-sm">
-                <span className="text-zinc-700">Humidite ideale (%)</span>
+                <span className="text-zinc-700">Humidite ideale (%) <span className="text-red-600">*</span></span>
                 <Input
                   type="number"
                   step="0.1"
@@ -167,7 +168,7 @@ export function CountryWarehouseView({
                 />
               </label>
               <label className="space-y-1 text-sm">
-                <span className="text-zinc-700">Tolerance temperature (C)</span>
+                <span className="text-zinc-700">Tolerance temperature (C) <span className="text-red-600">*</span></span>
                 <Input
                   type="number"
                   step="0.1"
@@ -178,7 +179,7 @@ export function CountryWarehouseView({
                 />
               </label>
               <label className="space-y-1 text-sm md:col-span-2">
-                <span className="text-zinc-700">Tolerance humidite (%)</span>
+                <span className="text-zinc-700">Tolerance humidite (%) <span className="text-red-600">*</span></span>
                 <Input
                   type="number"
                   step="0.1"

@@ -151,17 +151,30 @@ export default function AdminPanel() {
           <CardTitle>Ajouter un utilisateur</CardTitle>
         </CardHeader>
         <CardContent>
+          <p className="mb-3 text-xs text-zinc-500">Les champs avec <span className="text-red-600">*</span> sont obligatoires.</p>
           <form className="grid gap-3 md:grid-cols-4" onSubmit={createUser}>
-            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nom" />
-            <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" type="email" />
-            <Input value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Mot de passe" type="password" />
-            <Select value={role} onChange={(e) => setRole(e.target.value)}>
-              {ROLE_OPTIONS.map((roleOption) => (
-                <option key={roleOption.value} value={roleOption.value}>
-                  {roleOption.label}
-                </option>
-              ))}
-            </Select>
+            <label className="space-y-1 text-sm">
+              <span className="text-zinc-700">Nom <span className="text-red-600">*</span></span>
+              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nom" required />
+            </label>
+            <label className="space-y-1 text-sm">
+              <span className="text-zinc-700">Email <span className="text-red-600">*</span></span>
+              <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" type="email" required />
+            </label>
+            <label className="space-y-1 text-sm">
+              <span className="text-zinc-700">Mot de passe <span className="text-red-600">*</span></span>
+              <Input value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Mot de passe" type="password" required />
+            </label>
+            <label className="space-y-1 text-sm">
+              <span className="text-zinc-700">Role <span className="text-red-600">*</span></span>
+              <Select value={role} onChange={(e) => setRole(e.target.value)} required>
+                {ROLE_OPTIONS.map((roleOption) => (
+                  <option key={roleOption.value} value={roleOption.value}>
+                    {roleOption.label}
+                  </option>
+                ))}
+              </Select>
+            </label>
             <Button className="md:col-span-4" type="submit">Ajouter utilisateur</Button>
           </form>
         </CardContent>

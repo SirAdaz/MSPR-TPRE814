@@ -42,9 +42,16 @@ export default function LoginPage() {
           <CardTitle>Connexion Siege</CardTitle>
         </CardHeader>
         <CardContent>
+          <p className="mb-3 text-xs text-zinc-500">Les champs avec <span className="text-red-600">*</span> sont obligatoires.</p>
           <form className="space-y-3" onSubmit={handleSubmit}>
-            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-            <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+            <label className="space-y-1 text-sm block">
+              <span className="text-zinc-700">Email <span className="text-red-600">*</span></span>
+              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            </label>
+            <label className="space-y-1 text-sm block">
+              <span className="text-zinc-700">Mot de passe <span className="text-red-600">*</span></span>
+              <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            </label>
             <Button className="w-full" type="submit">Se connecter</Button>
           </form>
           {error ? <p className="mt-3 text-sm text-red-600">{error}</p> : null}
