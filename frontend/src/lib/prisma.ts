@@ -6,7 +6,7 @@ const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 const adapter = new PrismaPg({
   connectionString:
     process.env.AUTH_DATABASE_URL ??
-    "postgresql://futurekawa:futurekawa@postgres-auth:5432/futurekawa_auth",
+    "postgresql://futurekawa:futurekawa@localhost:5434/futurekawa_auth",
 });
 
 export const prisma = globalForPrisma.prisma ?? new PrismaClient({ adapter });

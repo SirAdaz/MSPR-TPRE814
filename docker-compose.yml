@@ -130,7 +130,7 @@ services:
 
   frontend:
     image: node:20
-    command: sh -c "npm install && npm run dev -- --hostname 0.0.0.0 --port 3000"
+    command: sh -c "npm install && until npx prisma migrate deploy; do echo 'Waiting for auth database...' && sleep 2; done && npx prisma generate && npm run dev -- --hostname 0.0.0.0 --port 3000 & NEXT_PID=$$! && node ./scripts/init-admin-user.mjs && wait $$NEXT_PID"
     working_dir: /app
     volumes:
       - ./frontend:/app
@@ -142,7 +142,9 @@ services:
       AUTH_DATABASE_URL: postgresql://futurekawa:futurekawa@postgres-auth:5432/futurekawa_auth
       BETTER_AUTH_SECRET: dev-better-auth-secret-32-characters-minimum!
       BETTER_AUTH_URL: http://localhost:3000
+      BETTER_AUTH_URL_INTERNAL: http://127.0.0.1:3000
       DEFAULT_ADMIN_EMAIL: admin@futurekawa.local
+      DEFAULT_ADMIN_PASSWORD: Admin123!
     depends_on:
       - postgres-auth
       - backend-br
