@@ -11,6 +11,7 @@ import {
   PUT as putLot,
 } from "@/app/api/countries/[id]/lots/[lotUid]/route";
 import { GET as getReadings } from "@/app/api/countries/[id]/readings/route";
+import { GET as getWarehouses, POST as postWarehouses } from "@/app/api/countries/[id]/warehouses/route";
 
 describe("countries api routes", () => {
   const originalFetch = global.fetch;
@@ -190,6 +191,22 @@ describe("countries api routes", () => {
     );
   });
 
+  it("proxies lots list with warehouse filter", async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      status: 200,
+      json: async () => [],
+    }) as unknown as typeof fetch;
+    const request = new NextRequest(
+      "http://localhost/api/countries/BR/lots?sort=storage_date&order=asc&warehouse_id=3",
+    );
+
+    await getLots(request, { params: Promise.resolve({ id: "BR" }) });
+    expect(global.fetch).toHaveBeenCalledWith(
+      "http://backend-br:8000/api/v1/lots?sort=storage_date&order=asc&warehouse_id=3",
+      expect.any(Object),
+    );
+  });
+
   it("proxies lot by uid read/update/delete", async () => {
     const fetchMock = jest
       .fn()
@@ -256,6 +273,84 @@ describe("countries api routes", () => {
       3,
       "http://backend-br:8000/api/v1/lots/LOT-1",
       expect.any(Object),
+    );
+  });
+
+  it("proxies alerts with warehouse filter", async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      status: 200,
+      json: async () => [],
+    }) as unknown as typeof fetch;
+    const request = new NextRequest("http://localhost/api/countries/BR/alerts?warehouse_id=2");
+
+    await getAlerts(request, { params: Promise.resolve({ id: "BR" }) });
+    expect(global.fetch).toHaveBeenCalledWith(
+      "http://backend-br:8000/api/v1/alerts?warehouse_id=2",
+      expect.any(Object),
+    );
+  });
+
+  it("proxies warehouses list route", async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      status: 200,
+      json: async () => [{ id: 1, name: "W1" }],
+    }) as unknown as typeof fetch;
+
+    const response = await getWarehouses(new NextRequest("http://localhost"), {
+      params: Promise.resolve({ id: "BR" }),
+    });
+
+    await expect(response.json()).resolves.toEqual([{ id: 1, name: "W1" }]);
+    expect(global.fetch).toHaveBeenCalledWith(
+      "http://backend-br:8000/api/v1/warehouses",
+      expect.any(Object),
+    );
+  });
+
+  it("proxies warehouses creation and status", async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      status: 201,
+      json: async () => ({ id: 5, name: "Warehouse BR-X" }),
+    }) as unknown as typeof fetch;
+    const request = new NextRequest("http://localhost/api/countries/BR/warehouses", {
+      method: "POST",
+      body: JSON.stringify({ name: "Warehouse BR-X" }),
+      headers: { "Content-Type": "application/json" },
+    });
+
+    const response = await postWarehouses(request, { params: Promise.resolve({ id: "BR" }) });
+    await expect(response.json()).resolves.toEqual({ id: 5, name: "Warehouse BR-X" });
+    expect(response.status).toBe(201);
+  });
+
+  it("falls back to BR backend for unknown id on warehouses", async () => {
+    const fetchMock = jest.fn().mockResolvedValue({
+      status: 200,
+      json: async () => ({ ok: true }),
+    });
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    await getWarehouses(new NextRequest("http://localhost"), {
+      params: Promise.resolve({ id: "XX" }),
+    });
+    await postWarehouses(
+      new NextRequest("http://localhost", {
+        method: "POST",
+        body: JSON.stringify({ name: "Warehouse XX" }),
+        headers: { "Content-Type": "application/json" },
+      }),
+      { params: Promise.resolve({ id: "XX" }) },
+    );
+
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      1,
+      "http://backend-br:8000/api/v1/warehouses",
+      expect.any(Object),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      2,
+      "http://backend-br:8000/api/v1/warehouses",
+      expect.objectContaining({ method: "POST" }),
     );
   });
 });

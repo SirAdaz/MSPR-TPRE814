@@ -22,6 +22,22 @@ def test_warehouses_list(client):
     assert response.json()[0]["name"] == "W1"
 
 
+def test_warehouses_create(client):
+    payload = {
+        "exploitation_id": 1,
+        "name": "W2",
+        "ideal_temp": 25.0,
+        "ideal_humidity": 58.0,
+        "temp_tolerance": 2.0,
+        "humidity_tolerance": 3.0,
+    }
+    response = client.post("/api/v1/warehouses", headers=FRONTEND_HEADERS, json=payload)
+    assert response.status_code == 200
+    body = response.json()
+    assert body["name"] == "W2"
+    assert body["exploitation_id"] == 1
+
+
 def test_lots_crud_and_validation(client):
     create_payload = {
         "lot_uid": "LOT-NEW",
@@ -59,6 +75,10 @@ def test_lots_crud_and_validation(client):
     ordered_response = client.get("/api/v1/lots?sort=storage_date&order=desc", headers=FRONTEND_HEADERS)
     assert ordered_response.status_code == 200
 
+    filtered_response = client.get("/api/v1/lots?warehouse_id=1", headers=FRONTEND_HEADERS)
+    assert filtered_response.status_code == 200
+    assert all(item["warehouse_id"] == 1 for item in filtered_response.json())
+
 
 def test_readings_list_filters_and_create(client):
     list_response = client.get("/api/v1/readings?warehouse_id=1", headers=FRONTEND_HEADERS)
@@ -88,3 +108,7 @@ def test_alerts_list(client):
     response = client.get("/api/v1/alerts?limit=5&offset=0", headers=FRONTEND_HEADERS)
     assert response.status_code == 200
     assert len(response.json()) >= 1
+
+    filtered_response = client.get("/api/v1/alerts?warehouse_id=1", headers=FRONTEND_HEADERS)
+    assert filtered_response.status_code == 200
+    assert all(item["warehouse_id"] == 1 for item in filtered_response.json())
