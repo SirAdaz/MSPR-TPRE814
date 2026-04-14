@@ -12,11 +12,15 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   const urlParams = new URLSearchParams();
   const limit = query.get("limit");
   const offset = query.get("offset");
+  const warehouseId = query.get("warehouse_id");
   if (limit) {
     urlParams.set("limit", limit);
   }
   if (offset) {
     urlParams.set("offset", offset);
+  }
+  if (warehouseId) {
+    urlParams.set("warehouse_id", warehouseId);
   }
   const route = urlParams.toString() ? `/api/v1/alerts?${urlParams.toString()}` : "/api/v1/alerts";
   const response = await fetch(`${baseUrl}${route}`, {

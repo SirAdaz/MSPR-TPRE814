@@ -28,12 +28,15 @@ def list_lots(
     order: str = Query("asc"),
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
+    warehouse_id: int | None = Query(default=None),
     db: Session = Depends(get_db),
     _: None = Depends(require_frontend_key),
 ):
     if sort != "storage_date":
         raise HTTPException(status_code=400, detail="Unsupported sort")
     query = db.query(Lot)
+    if warehouse_id is not None:
+        query = query.filter(Lot.warehouse_id == warehouse_id)
     query = query.order_by(Lot.storage_date.asc() if order == "asc" else Lot.storage_date.desc())
     query = query.offset(offset).limit(limit)
     return query.all()

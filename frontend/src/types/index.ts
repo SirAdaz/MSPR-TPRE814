@@ -23,3 +23,13 @@ export interface Alert {
   email_sent: boolean;
   created_at: string;
 }
+
+export interface Warehouse {
+  id: number;
+  exploitation_id: number;
+  name: string;
+  ideal_temp: number;
+  ideal_humidity: number;
+  temp_tolerance: number;
+  humidity_tolerance: number;
+}

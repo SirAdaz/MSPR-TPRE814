@@ -4,34 +4,16 @@ import { countryApiMap } from "@/lib/countries";
 
 const frontendApiKey = process.env.FRONTEND_API_KEY ?? "front-dev-key";
 
-export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const key = id as keyof typeof countryApiMap;
   const baseUrl = countryApiMap[key] ?? countryApiMap.BR;
-  const query = request.nextUrl.searchParams;
-  const urlParams = new URLSearchParams({
-    sort: query.get("sort") ?? "storage_date",
-    order: query.get("order") ?? "asc",
-  });
-  const limit = query.get("limit");
-  const offset = query.get("offset");
-  const warehouseId = query.get("warehouse_id");
-  if (limit) {
-    urlParams.set("limit", limit);
-  }
-  if (offset) {
-    urlParams.set("offset", offset);
-  }
-  if (warehouseId) {
-    urlParams.set("warehouse_id", warehouseId);
-  }
-
-  const response = await fetch(`${baseUrl}/api/v1/lots?${urlParams.toString()}`, {
+  const response = await fetch(`${baseUrl}/api/v1/warehouses`, {
     cache: "no-store",
     headers: { "X-Frontend-Key": frontendApiKey },
   });
   const data = await response.json();
-  return NextResponse.json(data);
+  return NextResponse.json(data, { status: response.status });
 }
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -39,10 +21,12 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   const key = id as keyof typeof countryApiMap;
   const baseUrl = countryApiMap[key] ?? countryApiMap.BR;
   const body = await request.json();
-
-  const response = await fetch(`${baseUrl}/api/v1/lots`, {
+  const response = await fetch(`${baseUrl}/api/v1/warehouses`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", "X-Frontend-Key": frontendApiKey },
+    headers: {
+      "Content-Type": "application/json",
+      "X-Frontend-Key": frontendApiKey,
+    },
     body: JSON.stringify(body),
     cache: "no-store",
   });

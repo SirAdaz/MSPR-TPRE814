@@ -25,6 +25,15 @@ class WarehouseOut(BaseModel):
         from_attributes = True
 
 
+class WarehouseCreate(BaseModel):
+    exploitation_id: int
+    name: str
+    ideal_temp: float
+    ideal_humidity: float
+    temp_tolerance: float = 3.0
+    humidity_tolerance: float = 2.0
+
+
 class LotCreate(BaseModel):
     lot_uid: str
     warehouse_id: int

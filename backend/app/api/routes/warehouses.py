@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from app.core.db import get_db
 from app.core.security import require_frontend_key
 from app.models import Warehouse
-from app.schemas.entities import WarehouseOut
+from app.schemas.entities import WarehouseCreate, WarehouseOut
 
 router = APIRouter()
 
@@ -15,3 +15,16 @@ def list_warehouses(
     _: None = Depends(require_frontend_key),
 ):
     return db.query(Warehouse).all()
+
+
+@router.post("/warehouses", response_model=WarehouseOut)
+def create_warehouse(
+    payload: WarehouseCreate,
+    db: Session = Depends(get_db),
+    _: None = Depends(require_frontend_key),
+):
+    warehouse = Warehouse(**payload.model_dump())
+    db.add(warehouse)
+    db.commit()
+    db.refresh(warehouse)
+    return warehouse

@@ -1,33 +1,42 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { CountryWarehouseView } from "@/components/CountryWarehouseView";
 import { PageHeaderNav } from "@/components/PageHeaderNav";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CountryCode } from "@/lib/countries";
-import { canAccessAlerts, canAccessCountry, canAccessLots } from "@/lib/permissions";
+import { canAccessAlerts, canAccessCountry, canAccessLots, canManageWarehouses } from "@/lib/permissions";
 import { requireSession } from "@/lib/server-auth";
 import { fetchJson } from "@/lib/client";
-import { Alert, Lot } from "@/types";
+import { Alert, Lot, Warehouse } from "@/types";
 
 interface Props {
   params: Promise<{ countryId: CountryCode }>;
+  searchParams: Promise<{ warehouseId?: string }>;
 }
 
-export default async function CountryPage({ params }: Props) {
+export default async function CountryPage({ params, searchParams }: Props) {
   const session = await requireSession();
   const { countryId } = await params;
+  const query = await searchParams;
+  const selectedWarehouseId = query.warehouseId ? Number(query.warehouseId) : null;
   const role = session.user?.role ?? "user";
   if (!canAccessCountry(role, countryId)) {
     redirect("/");
   }
   const showLots = canAccessLots(role, countryId);
   const showAlerts = canAccessAlerts(role, countryId);
+  const canManage = canManageWarehouses(role, countryId);
+  const warehouses = await fetchJson<Warehouse[]>(`/api/countries/${countryId}/warehouses`);
+  const warehouseFilter = Number.isFinite(selectedWarehouseId) && selectedWarehouseId ? `&warehouse_id=${selectedWarehouseId}` : "";
   const [lots, alerts] = await Promise.all([
     showLots
-      ? fetchJson<Lot[]>(`/api/countries/${countryId}/lots?limit=5&offset=0&sort=storage_date&order=asc`)
+      ? fetchJson<Lot[]>(`/api/countries/${countryId}/lots?limit=5&offset=0&sort=storage_date&order=asc${warehouseFilter}`)
       : Promise.resolve([]),
-    showAlerts ? fetchJson<Alert[]>(`/api/countries/${countryId}/alerts?limit=5&offset=0`) : Promise.resolve([]),
+    showAlerts
+      ? fetchJson<Alert[]>(`/api/countries/${countryId}/alerts?limit=5&offset=0${warehouseFilter}`)
+      : Promise.resolve([]),
   ]);
 
   return (
@@ -100,6 +109,14 @@ export default async function CountryPage({ params }: Props) {
           </CardContent>
         </Card>
       </div>
+      <CountryWarehouseView
+        countryId={countryId}
+        warehouses={warehouses}
+        selectedWarehouseId={selectedWarehouseId}
+        lots={lots}
+        alerts={alerts}
+        canManage={canManage}
+      />
     </main>
   );
 }
