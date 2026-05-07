@@ -38,6 +38,19 @@ def test_warehouses_create(client):
     assert body["exploitation_id"] == 1
 
 
+def test_warehouses_create_rejects_invalid_humidity(client):
+    payload = {
+        "exploitation_id": 1,
+        "name": "W-invalid",
+        "ideal_temp": 25.0,
+        "ideal_humidity": 120.0,
+        "temp_tolerance": 2.0,
+        "humidity_tolerance": 3.0,
+    }
+    response = client.post("/api/v1/warehouses", headers=FRONTEND_HEADERS, json=payload)
+    assert response.status_code == 422
+
+
 def test_lots_crud_and_validation(client):
     create_payload = {
         "lot_uid": "LOT-NEW",
@@ -102,6 +115,22 @@ def test_readings_list_filters_and_create(client):
     )
     assert create_response.status_code == 200
     assert create_response.json()["warehouse_id"] == 1
+
+
+def test_readings_create_rejects_unrealistic_values(client):
+    bad_humidity_response = client.post(
+        "/api/v1/readings",
+        headers=SENSOR_HEADERS,
+        json={"warehouse_id": 1, "temperature": 30.1, "humidity": 120.0},
+    )
+    assert bad_humidity_response.status_code == 422
+
+    bad_temperature_response = client.post(
+        "/api/v1/readings",
+        headers=SENSOR_HEADERS,
+        json={"warehouse_id": 1, "temperature": -45.0, "humidity": 45.0},
+    )
+    assert bad_temperature_response.status_code == 422
 
 
 def test_alerts_list(client):
