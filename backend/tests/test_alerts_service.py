@@ -54,6 +54,28 @@ def test_create_alert_persists_alert(client, monkeypatch):
     assert len(after.json()) == baseline + 1
 
 
+def test_create_alert_respects_cooldown(client, monkeypatch):
+    monkeypatch.setattr(alerts_service, "send_alert_email", lambda *_args, **_kwargs: True)
+    monkeypatch.setattr(alerts_service.settings, "enable_alert_cooldown", True)
+    monkeypatch.setattr(alerts_service.settings, "alert_cooldown_seconds", 300)
+    from app.core.db import get_db
+    from app.main import app
+
+    baseline = client.get("/api/v1/alerts", headers={"X-Frontend-Key": "front-dev-key"})
+    baseline_count = len(baseline.json())
+
+    db_gen = app.dependency_overrides[get_db]()
+    db = next(db_gen)
+    first_alert = alerts_service.create_alert(db, warehouse_id=1, alert_type="CONDITIONS", message="first")
+    second_alert = alerts_service.create_alert(db, warehouse_id=1, alert_type="CONDITIONS", message="second")
+
+    assert first_alert is not None
+    assert second_alert is None
+
+    after = client.get("/api/v1/alerts", headers={"X-Frontend-Key": "front-dev-key"})
+    assert len(after.json()) == baseline_count + 1
+
+
 def test_check_expired_lots_marks_status(client, monkeypatch):
     monkeypatch.setattr(alerts_service, "send_alert_email", lambda *_args, **_kwargs: False)
     from app.core.db import get_db

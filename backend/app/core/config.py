@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:///./futurekawa.db"
     simulation_environment_interval_seconds: int = 60
     simulation_logistics_interval_seconds: int = 120
+    enable_alert_cooldown: bool = True
+    alert_cooldown_seconds: int = 0
     mqtt_host: str = "mosquitto-br"
     mqtt_port: int = 1883
     mqtt_topic: str = "warehouse/+/sensors"

@@ -61,6 +61,8 @@ services:
       ENABLE_SCHEDULER: "true"
       ENABLE_MQTT: "false"
       ENABLE_SIMULATION: "true"
+      ENABLE_ALERT_COOLDOWN: "true"
+      ALERT_COOLDOWN_SECONDS: 0
       SIMULATION_ENVIRONMENT_INTERVAL_SECONDS: 45
       SIMULATION_LOGISTICS_INTERVAL_SECONDS: 90
       DATABASE_URL: postgresql://futurekawa:futurekawa@postgres-br:5432/futurekawa_br
@@ -91,6 +93,8 @@ services:
       ENABLE_SCHEDULER: "true"
       ENABLE_MQTT: "false"
       ENABLE_SIMULATION: "true"
+      ENABLE_ALERT_COOLDOWN: "true"
+      ALERT_COOLDOWN_SECONDS: 0
       SIMULATION_ENVIRONMENT_INTERVAL_SECONDS: 45
       SIMULATION_LOGISTICS_INTERVAL_SECONDS: 90
       DATABASE_URL: postgresql://futurekawa:futurekawa@postgres-ec:5432/futurekawa_ec
@@ -121,6 +125,8 @@ services:
       ENABLE_SCHEDULER: "true"
       ENABLE_MQTT: "false"
       ENABLE_SIMULATION: "true"
+      ENABLE_ALERT_COOLDOWN: "true"
+      ALERT_COOLDOWN_SECONDS: 0
       SIMULATION_ENVIRONMENT_INTERVAL_SECONDS: 45
       SIMULATION_LOGISTICS_INTERVAL_SECONDS: 90
       DATABASE_URL: postgresql://futurekawa:futurekawa@postgres-co:5432/futurekawa_co

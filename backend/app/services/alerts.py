@@ -43,7 +43,28 @@ def send_alert_email(subject: str, content: str) -> bool:
         return False
 
 
-def create_alert(db: Session, warehouse_id: int, alert_type: str, message: str, lot_id: int | None = None) -> Alert:
+def _is_alert_in_cooldown(db: Session, warehouse_id: int, alert_type: str) -> bool:
+    if not settings.enable_alert_cooldown or settings.alert_cooldown_seconds <= 0:
+        return False
+
+    threshold = datetime.utcnow() - timedelta(seconds=settings.alert_cooldown_seconds)
+    latest_alert = (
+        db.query(Alert)
+        .filter(Alert.warehouse_id == warehouse_id, Alert.alert_type == alert_type)
+        .order_by(Alert.created_at.desc())
+        .first()
+    )
+    return latest_alert is not None and latest_alert.created_at >= threshold
+
+
+def create_alert(db: Session, warehouse_id: int, alert_type: str, message: str, lot_id: int | None = None) -> Alert | None:
+    if _is_alert_in_cooldown(db, warehouse_id, alert_type):
+        logger.info(
+            "alert_suppressed_by_cooldown",
+            extra={"country": settings.country_code, "warehouse_id": warehouse_id, "alert_type": alert_type},
+        )
+        return None
+
     email_sent = send_alert_email(f"FutureKawa alert: {alert_type}", message)
     alert = Alert(
         warehouse_id=warehouse_id,
