@@ -71,6 +71,9 @@ services:
       SMTP_HOST: mailhog
       SMTP_PORT: 1025
       ALERT_EMAIL_TO: brazil.ops@futurekawa.local
+      ALERT_EMAIL_BR: brazil.ops@futurekawa.local
+      ALERT_EMAIL_EC: ecuador.ops@futurekawa.local
+      ALERT_EMAIL_CO: colombia.ops@futurekawa.local
     depends_on:
       - postgres-br
       - mosquitto-br
@@ -98,6 +101,9 @@ services:
       SMTP_HOST: mailhog
       SMTP_PORT: 1025
       ALERT_EMAIL_TO: ecuador.ops@futurekawa.local
+      ALERT_EMAIL_BR: brazil.ops@futurekawa.local
+      ALERT_EMAIL_EC: ecuador.ops@futurekawa.local
+      ALERT_EMAIL_CO: colombia.ops@futurekawa.local
     depends_on:
       - postgres-ec
       - mosquitto-ec
@@ -125,6 +131,9 @@ services:
       SMTP_HOST: mailhog
       SMTP_PORT: 1025
       ALERT_EMAIL_TO: colombia.ops@futurekawa.local
+      ALERT_EMAIL_BR: brazil.ops@futurekawa.local
+      ALERT_EMAIL_EC: ecuador.ops@futurekawa.local
+      ALERT_EMAIL_CO: colombia.ops@futurekawa.local
     depends_on:
       - postgres-co
       - mosquitto-co

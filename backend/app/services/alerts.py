@@ -11,16 +11,29 @@ from app.models import Alert, Lot, Warehouse
 logger = logging.getLogger(__name__)
 
 
+def _get_alert_recipient() -> str:
+    by_country = {
+        "BR": settings.alert_email_br,
+        "EC": settings.alert_email_ec,
+        "CO": settings.alert_email_co,
+    }
+    return by_country.get(settings.country_code.upper(), settings.alert_email_to)
+
+
 def send_alert_email(subject: str, content: str) -> bool:
     msg = EmailMessage()
     msg["Subject"] = subject
     msg["From"] = "noreply@futurekawa.local"
-    msg["To"] = settings.alert_email_to
+    recipient = _get_alert_recipient()
+    msg["To"] = recipient
     msg.set_content(content)
     try:
         with smtplib.SMTP(settings.smtp_host, settings.smtp_port, timeout=5) as smtp:
             smtp.send_message(msg)
-        logger.info("alert_email_sent", extra={"country": settings.country_code, "subject": subject})
+        logger.info(
+            "alert_email_sent",
+            extra={"country": settings.country_code, "subject": subject, "recipient": recipient},
+        )
         return True
     except Exception as exc:
         logger.warning(

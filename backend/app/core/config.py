@@ -18,6 +18,9 @@ class Settings(BaseSettings):
     smtp_host: str = "mailhog"
     smtp_port: int = 1025
     alert_email_to: str = "ops@example.com"
+    alert_email_br: str = "brazil.ops@futurekawa.local"
+    alert_email_ec: str = "ecuador.ops@futurekawa.local"
+    alert_email_co: str = "colombia.ops@futurekawa.local"
     frontend_api_key: str = "front-dev-key"
     sensor_api_key: str = "sensor-dev-key"
 
