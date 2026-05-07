@@ -8,9 +8,10 @@ import hudson.triggers.SCMTrigger
 
 def jenkins = Jenkins.get()
 def jobName = "futurekawa-pipeline"
+def job = jenkins.getItem(jobName) as WorkflowJob
 
-if (jenkins.getItem(jobName) == null) {
-    def job = jenkins.createProject(WorkflowJob, jobName)
+if (job == null) {
+    job = jenkins.createProject(WorkflowJob, jobName)
     def scm = new GitSCM(
         GitSCM.createRepoList("file:///workspace/project", null),
         [new BranchSpec("*/main")],
@@ -26,4 +27,9 @@ if (jenkins.getItem(jobName) == null) {
     job.addTrigger(new SCMTrigger("H/5 * * * *"))
     job.save()
     println("Created Jenkins job: ${jobName}")
+}
+
+if (job.getBuilds().isEmpty()) {
+    job.scheduleBuild2(0)
+    println("Scheduled first build for: ${jobName}")
 }
