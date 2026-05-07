@@ -1,0 +1,19 @@
+jenkins:
+  systemMessage: "FutureKawa Jenkins managed by Configuration as Code."
+  numExecutors: 2
+  mode: NORMAL
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: "${JENKINS_ADMIN_ID:-admin}"
+          password: "${JENKINS_ADMIN_PASSWORD:-admin123}"
+  authorizationStrategy:
+    globalMatrix:
+      permissions:
+        - "Overall/Administer:${JENKINS_ADMIN_ID:-admin}"
+        - "Overall/Read:authenticated"
+
+unclassified:
+  location:
+    url: "${JENKINS_URL:-http://localhost:8080/}"
