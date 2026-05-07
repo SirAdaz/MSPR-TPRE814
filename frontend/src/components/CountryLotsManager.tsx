@@ -12,6 +12,7 @@ import { Lot } from "@/types";
 
 type Props = {
   countryId: string;
+  selectedWarehouseId: number | null;
 };
 
 type LotForm = {
@@ -29,7 +30,7 @@ const initialForm: LotForm = {
   status: "conforme",
 };
 
-export function CountryLotsManager({ countryId }: Props) {
+export function CountryLotsManager({ countryId, selectedWarehouseId }: Props) {
   const [lots, setLots] = useState<Lot[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingUid, setEditingUid] = useState<string | null>(null);
@@ -44,8 +45,10 @@ export function CountryLotsManager({ countryId }: Props) {
     setError(null);
     try {
       const offset = page * PAGE_SIZE;
+      const warehouseFilter =
+        Number.isFinite(selectedWarehouseId) && selectedWarehouseId ? `&warehouse_id=${selectedWarehouseId}` : "";
       const response = await fetch(
-        `/api/countries/${countryId}/lots?limit=${PAGE_SIZE + 1}&offset=${offset}&sort=storage_date&order=asc`,
+        `/api/countries/${countryId}/lots?limit=${PAGE_SIZE + 1}&offset=${offset}&sort=storage_date&order=asc${warehouseFilter}`,
         { cache: "no-store" },
       );
       const data = (await response.json()) as Lot[];
@@ -60,7 +63,11 @@ export function CountryLotsManager({ countryId }: Props) {
 
   useEffect(() => {
     void loadLots();
-  }, [countryId, page]);
+  }, [countryId, page, selectedWarehouseId]);
+
+  useEffect(() => {
+    setPage(0);
+  }, [selectedWarehouseId]);
 
   async function handleCreate(event: FormEvent) {
     event.preventDefault();

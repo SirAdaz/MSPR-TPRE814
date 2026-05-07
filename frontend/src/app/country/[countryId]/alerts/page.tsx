@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { PageHeaderNav } from "@/components/PageHeaderNav";
+import { WarehouseFilterSelect } from "@/components/WarehouseFilterSelect";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,11 +10,11 @@ import { CountryCode } from "@/lib/countries";
 import { canAccessAlerts } from "@/lib/permissions";
 import { requireSession } from "@/lib/server-auth";
 import { fetchJson } from "@/lib/client";
-import { Alert } from "@/types";
+import { Alert, Warehouse } from "@/types";
 
 interface Props {
   params: Promise<{ countryId: CountryCode }>;
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; warehouseId?: string }>;
 }
 
 const PAGE_SIZE = 10;
@@ -26,11 +27,14 @@ export default async function AlertsPage({ params, searchParams }: Props) {
     redirect(`/country/${countryId}`);
   }
   const query = await searchParams;
+  const selectedWarehouseId = query.warehouseId ? Number(query.warehouseId) : null;
   const parsedPage = Number(query.page ?? "1");
   const page = Number.isFinite(parsedPage) && parsedPage > 0 ? Math.floor(parsedPage) : 1;
   const offset = (page - 1) * PAGE_SIZE;
+  const warehouseFilter = Number.isFinite(selectedWarehouseId) && selectedWarehouseId ? `&warehouse_id=${selectedWarehouseId}` : "";
+  const warehouses = await fetchJson<Warehouse[]>(`/api/countries/${countryId}/warehouses`);
   const fetchedAlerts = await fetchJson<Alert[]>(
-    `/api/countries/${countryId}/alerts?limit=${PAGE_SIZE + 1}&offset=${offset}`,
+    `/api/countries/${countryId}/alerts?limit=${PAGE_SIZE + 1}&offset=${offset}${warehouseFilter}`,
   );
   const hasNextPage = fetchedAlerts.length > PAGE_SIZE;
   const alerts = fetchedAlerts.slice(0, PAGE_SIZE);
@@ -47,6 +51,14 @@ export default async function AlertsPage({ params, searchParams }: Props) {
         ]}
       />
       <h1 className="text-3xl font-bold">Alertes - {countryId}</h1>
+      <div className="mt-6 space-y-3">
+        <p className="text-sm text-zinc-600">Filtrer les alertes par entrepot.</p>
+        <WarehouseFilterSelect
+          warehouses={warehouses}
+          selectedWarehouseId={Number.isFinite(selectedWarehouseId) && selectedWarehouseId ? selectedWarehouseId : null}
+          resetPageOnChange
+        />
+      </div>
       <div className="mt-6 space-y-3">
         {alerts.map((alert) => (
           <Card key={alert.id}>
@@ -67,7 +79,11 @@ export default async function AlertsPage({ params, searchParams }: Props) {
             Precedent
           </Button>
         ) : (
-          <Link href={`/country/${countryId}/alerts?page=${page - 1}`}>
+          <Link
+            href={`/country/${countryId}/alerts?page=${page - 1}${
+              Number.isFinite(selectedWarehouseId) && selectedWarehouseId ? `&warehouseId=${selectedWarehouseId}` : ""
+            }`}
+          >
             <Button size="sm" variant="outline">Precedent</Button>
           </Link>
         )}
@@ -77,7 +93,11 @@ export default async function AlertsPage({ params, searchParams }: Props) {
             Suivant
           </Button>
         ) : (
-          <Link href={`/country/${countryId}/alerts?page=${page + 1}`}>
+          <Link
+            href={`/country/${countryId}/alerts?page=${page + 1}${
+              Number.isFinite(selectedWarehouseId) && selectedWarehouseId ? `&warehouseId=${selectedWarehouseId}` : ""
+            }`}
+          >
             <Button size="sm" variant="outline">Suivant</Button>
           </Link>
         )}
