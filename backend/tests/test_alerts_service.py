@@ -99,3 +99,37 @@ def test_check_expired_lots_marks_status(client, monkeypatch):
     refreshed = db.query(Lot).filter(Lot.lot_uid == "LOT-OLD").first()
     assert refreshed is not None
     assert refreshed.status == "perime"
+
+
+def test_check_expired_lots_marks_soon_status_without_duplicates(client, monkeypatch):
+    monkeypatch.setattr(alerts_service, "send_alert_email", lambda *_args, **_kwargs: False)
+    from app.core.db import get_db
+    from app.main import app
+    from app.models import Alert
+
+    db_gen = app.dependency_overrides[get_db]()
+    db = next(db_gen)
+
+    soon_lot = Lot(
+        lot_uid="LOT-SOON",
+        warehouse_id=1,
+        storage_date=date.today() - timedelta(days=320),
+        status="conforme",
+    )
+    db.add(soon_lot)
+    db.commit()
+
+    created_first = alerts_service.check_expired_lots(db)
+    assert created_first >= 1
+
+    refreshed = db.query(Lot).filter(Lot.lot_uid == "LOT-SOON").first()
+    assert refreshed is not None
+    assert refreshed.status == "bientot_perime"
+
+    _ = alerts_service.check_expired_lots(db)
+    soon_alerts = (
+        db.query(Alert)
+        .filter(Alert.lot_id == refreshed.id, Alert.alert_type == "EXPIRATION_SOON")
+        .all()
+    )
+    assert len(soon_alerts) == 1

@@ -107,14 +107,32 @@ def evaluate_reading(db: Session, warehouse: Warehouse, temperature: float, humi
 
 
 def check_expired_lots(db: Session) -> int:
-    threshold = datetime.utcnow().date() - timedelta(days=365)
-    expired = db.query(Lot).filter(Lot.storage_date < threshold, Lot.actual_dispatch_date.is_(None)).all()
+    now = datetime.utcnow().date()
+    expiration_threshold = now - timedelta(days=365)
+    soon_expiration_threshold = now - timedelta(days=300)
+    active_lots = db.query(Lot).filter(Lot.actual_dispatch_date.is_(None)).all()
+
     created = 0
-    for lot in expired:
-        msg = f"Lot {lot.lot_uid} depasse 365 jours de stockage."
-        create_alert(db, lot.warehouse_id, "EXPIRATION", msg, lot_id=lot.id)
-        lot.status = "perime"
-        created += 1
+    for lot in active_lots:
+        if lot.storage_date < expiration_threshold:
+            msg = f"Lot {lot.lot_uid} depasse 365 jours de stockage."
+            create_alert(db, lot.warehouse_id, "EXPIRATION", msg, lot_id=lot.id)
+            lot.status = "perime"
+            created += 1
+            continue
+
+        if lot.storage_date < soon_expiration_threshold and lot.status != "perime":
+            existing_soon_alert = (
+                db.query(Alert)
+                .filter(Alert.lot_id == lot.id, Alert.alert_type == "EXPIRATION_SOON")
+                .first()
+            )
+            if existing_soon_alert is None:
+                msg = f"Lot {lot.lot_uid} approche 1 an de stockage (seuil 10 mois atteint)."
+                create_alert(db, lot.warehouse_id, "EXPIRATION_SOON", msg, lot_id=lot.id)
+                created += 1
+            lot.status = "bientot_perime"
+
     db.commit()
     if created > 0:
         logger.warning("expired_lots_detected", extra={"country": settings.country_code, "count": created})
