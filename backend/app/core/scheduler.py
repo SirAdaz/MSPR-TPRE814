@@ -14,7 +14,7 @@ def _run_expiration_check() -> None:
     db = SessionLocal()
     try:
         created = check_expired_lots(db)
-        logger.info("scheduler_expiration_done", extra={"country": settings.country_code, "alerts_created": created})
+        logger.debug("scheduler_expiration_done", extra={"country": settings.country_code, "alerts_created": created})
     finally:
         db.close()
 
@@ -23,7 +23,7 @@ def _run_environment_simulation() -> None:
     db = SessionLocal()
     try:
         generated = simulate_environment(db)
-        logger.info("scheduler_environment_done", extra={"country": settings.country_code, "readings_generated": generated})
+        logger.debug("scheduler_environment_done", extra={"country": settings.country_code, "readings_generated": generated})
     finally:
         db.close()
 
@@ -32,7 +32,7 @@ def _run_logistics_simulation() -> None:
     db = SessionLocal()
     try:
         events = simulate_truck_movements(db)
-        logger.info("scheduler_logistics_done", extra={"country": settings.country_code, "events": events})
+        logger.debug("scheduler_logistics_done", extra={"country": settings.country_code, "events": events})
     finally:
         db.close()
 

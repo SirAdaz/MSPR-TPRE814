@@ -66,7 +66,7 @@ def simulate_truck_movements(db: Session) -> int:
         created_or_shipped += 1
 
     db.commit()
-    logger.info(
+    logger.debug(
         "simulation_logistics_cycle",
         extra={"country": settings.country_code, "warehouses": len(warehouses), "events": created_or_shipped},
     )
@@ -133,7 +133,7 @@ def simulate_environment(db: Session) -> int:
             generated += 1
 
     db.commit()
-    logger.info(
+    logger.debug(
         "simulation_environment_cycle",
         extra={"country": settings.country_code, "warehouses": len(warehouses), "readings_generated": generated},
     )

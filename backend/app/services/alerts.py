@@ -59,7 +59,7 @@ def _is_alert_in_cooldown(db: Session, warehouse_id: int, alert_type: str) -> bo
 
 def create_alert(db: Session, warehouse_id: int, alert_type: str, message: str, lot_id: int | None = None) -> Alert | None:
     if _is_alert_in_cooldown(db, warehouse_id, alert_type):
-        logger.info(
+        logger.debug(
             "alert_suppressed_by_cooldown",
             extra={"country": settings.country_code, "warehouse_id": warehouse_id, "alert_type": alert_type},
         )
@@ -119,5 +119,5 @@ def check_expired_lots(db: Session) -> int:
     if created > 0:
         logger.warning("expired_lots_detected", extra={"country": settings.country_code, "count": created})
     else:
-        logger.info("expired_lots_check_ok", extra={"country": settings.country_code, "count": 0})
+        logger.debug("expired_lots_check_ok", extra={"country": settings.country_code, "count": 0})
     return created

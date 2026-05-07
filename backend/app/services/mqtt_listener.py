@@ -43,7 +43,7 @@ async def _consume() -> None:
                 warehouse = db.query(Warehouse).filter(Warehouse.id == warehouse_id).first()
                 if warehouse:
                     evaluate_reading(db, warehouse, temperature, humidity)
-                logger.info(
+                logger.debug(
                     "mqtt_reading_persisted",
                     extra={"warehouse_id": warehouse_id, "temperature": temperature, "humidity": humidity},
                 )
