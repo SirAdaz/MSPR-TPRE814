@@ -33,3 +33,27 @@ def test_evaluate_reading_creates_alert_when_out_of_range(monkeypatch):
     monkeypatch.setattr(alerts_service, "create_alert", lambda *_args, **_kwargs: "ALERT")
     result = evaluate_reading(FakeDB(), warehouse, 40.0, 70.0)
     assert result == "ALERT"
+
+
+def test_check_expired_lots_returns_zero_when_none():
+    class FakeLotQuery:
+        def filter(self, *_args, **_kwargs):
+            return self
+
+        def all(self):
+            return []
+
+    class FakeDbNoExpired:
+        def __init__(self):
+            self.commit_calls = 0
+
+        def query(self, _model):
+            return FakeLotQuery()
+
+        def commit(self):
+            self.commit_calls += 1
+
+    db = FakeDbNoExpired()
+    created = alerts_service.check_expired_lots(db)
+    assert created == 0
+    assert db.commit_calls == 1
