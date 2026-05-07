@@ -38,6 +38,6 @@ export function canManageWarehouses(role: string, countryId: CountryCode): boole
   return role === COUNTRY_EXPLOITATION_ROLE[countryId];
 }
 
-export function canAccessAdmin(role: string, email: string): boolean {
-  return role === "admin" || email === (process.env.DEFAULT_ADMIN_EMAIL ?? "admin@futurekawa.local");
+export function canAccessAdmin(role: string): boolean {
+  return role === "admin";
 }

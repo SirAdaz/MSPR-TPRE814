@@ -13,7 +13,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const email = session?.user?.email ?? "";
   const role = session?.user?.role ?? "user";
   const initial = email ? email[0].toUpperCase() : "";
-  const showAdmin = canAccessAdmin(role, email);
+  const showAdmin = canAccessAdmin(role);
 
   return (
     <html lang="fr">
