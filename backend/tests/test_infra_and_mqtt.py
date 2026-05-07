@@ -56,13 +56,15 @@ def test_run_post_create_migrations_creates_missing_countries_and_lot_columns(mo
 
     class FakeInspector:
         def get_table_names(self):
-            return ["exploitations", "lots"]
+            return ["exploitations", "lots", "warehouses"]
 
         def get_columns(self, table_name):
             if table_name == "exploitations":
                 return [{"name": "id"}, {"name": "name"}, {"name": "country_id"}]
             if table_name == "lots":
                 return [{"name": "id"}, {"name": "storage_date"}]
+            if table_name == "warehouses":
+                return [{"name": "id"}, {"name": "temp_tolerance"}]
             return []
 
     class FakeConnection:
@@ -88,6 +90,8 @@ def test_run_post_create_migrations_creates_missing_countries_and_lot_columns(mo
     assert any("CREATE TABLE countries" in sql for sql in executed)
     assert any("ALTER TABLE lots ADD COLUMN planned_dispatch_date" in sql for sql in executed)
     assert any("ALTER TABLE lots ADD COLUMN actual_dispatch_date" in sql for sql in executed)
+    assert any("ALTER TABLE warehouses ADD COLUMN temperature_tolerance" in sql for sql in executed)
+    assert any("UPDATE warehouses SET temperature_tolerance = temp_tolerance" in sql for sql in executed)
 
 
 def test_run_post_create_migrations_adds_exploitation_country_id_from_legacy_columns(monkeypatch):
@@ -95,13 +99,15 @@ def test_run_post_create_migrations_adds_exploitation_country_id_from_legacy_col
 
     class FakeInspector:
         def get_table_names(self):
-            return ["countries", "exploitations", "lots"]
+            return ["countries", "exploitations", "lots", "warehouses"]
 
         def get_columns(self, table_name):
             if table_name == "exploitations":
                 return [{"name": "id"}, {"name": "country_code"}, {"name": "country_name"}]
             if table_name == "lots":
                 return [{"name": "id"}, {"name": "storage_date"}, {"name": "planned_dispatch_date"}, {"name": "actual_dispatch_date"}]
+            if table_name == "warehouses":
+                return [{"name": "id"}, {"name": "temp_tolerance"}, {"name": "temperature_tolerance"}]
             return []
 
     class FakeConnection:

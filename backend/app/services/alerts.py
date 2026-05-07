@@ -84,7 +84,7 @@ def create_alert(db: Session, warehouse_id: int, alert_type: str, message: str, 
 
 
 def evaluate_reading(db: Session, warehouse: Warehouse, temperature: float, humidity: float) -> Alert | None:
-    out_of_temp = abs(temperature - warehouse.ideal_temp) > warehouse.temp_tolerance
+    out_of_temp = abs(temperature - warehouse.ideal_temp) > warehouse.temperature_tolerance
     out_of_humidity = abs(humidity - warehouse.ideal_humidity) > warehouse.humidity_tolerance
     if not out_of_temp and not out_of_humidity:
         return None

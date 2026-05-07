@@ -45,7 +45,7 @@ def ensure_demo_data() -> None:
             name=f"Warehouse {country}-A",
             ideal_temp=18.5,
             ideal_humidity=60.0,
-            temp_tolerance=3.0,
+            temperature_tolerance=3.0,
             humidity_tolerance=5.0,
         )
         warehouse_b = Warehouse(
@@ -53,7 +53,7 @@ def ensure_demo_data() -> None:
             name=f"Warehouse {country}-B",
             ideal_temp=19.0,
             ideal_humidity=58.0,
-            temp_tolerance=3.0,
+            temperature_tolerance=3.0,
             humidity_tolerance=5.0,
         )
         db.add_all([warehouse_a, warehouse_b])

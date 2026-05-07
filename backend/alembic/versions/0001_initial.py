@@ -28,7 +28,7 @@ def upgrade() -> None:
         sa.Column("name", sa.String(length=255), nullable=False),
         sa.Column("ideal_temp", sa.Float(), nullable=False),
         sa.Column("ideal_humidity", sa.Float(), nullable=False),
-        sa.Column("temp_tolerance", sa.Float(), nullable=False, server_default="3"),
+        sa.Column("temperature_tolerance", sa.Float(), nullable=False, server_default="3"),
         sa.Column("humidity_tolerance", sa.Float(), nullable=False, server_default="2"),
     )
     op.create_table(

@@ -41,7 +41,7 @@ def client(monkeypatch, tmp_path):
         name="W1",
         ideal_temp=29.0,
         ideal_humidity=55.0,
-        temp_tolerance=3.0,
+        temperature_tolerance=3.0,
         humidity_tolerance=2.0,
     )
     db.add(warehouse)

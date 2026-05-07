@@ -14,7 +14,7 @@ type WarehouseForm = {
   name: string;
   ideal_temp: string;
   ideal_humidity: string;
-  temp_tolerance: string;
+  temperature_tolerance: string;
   humidity_tolerance: string;
 };
 
@@ -31,7 +31,7 @@ const DEFAULT_FORM: WarehouseForm = {
   name: "",
   ideal_temp: "",
   ideal_humidity: "",
-  temp_tolerance: "",
+  temperature_tolerance: "",
   humidity_tolerance: "",
 };
 
@@ -81,7 +81,7 @@ export function CountryWarehouseView({
           name: form.name,
           ideal_temp: Number(form.ideal_temp),
           ideal_humidity: Number(form.ideal_humidity),
-          temp_tolerance: Number(form.temp_tolerance),
+          temperature_tolerance: Number(form.temperature_tolerance),
           humidity_tolerance: Number(form.humidity_tolerance),
         }),
       });
@@ -118,7 +118,7 @@ export function CountryWarehouseView({
           </Select>
           {selectedWarehouse ? (
             <p className="text-sm text-zinc-600">
-              Seuils {selectedWarehouse.name} - Temp {selectedWarehouse.ideal_temp} +/- {selectedWarehouse.temp_tolerance}
+              Seuils {selectedWarehouse.name} - Temp {selectedWarehouse.ideal_temp} +/- {selectedWarehouse.temperature_tolerance}
               {" "} C, Humidite {selectedWarehouse.ideal_humidity} +/- {selectedWarehouse.humidity_tolerance}%
             </p>
           ) : (
@@ -174,8 +174,8 @@ export function CountryWarehouseView({
                   type="number"
                   step="0.1"
                   placeholder="Ex: 3"
-                  value={form.temp_tolerance}
-                  onChange={(event) => setForm((prev) => ({ ...prev, temp_tolerance: event.target.value }))}
+                  value={form.temperature_tolerance}
+                  onChange={(event) => setForm((prev) => ({ ...prev, temperature_tolerance: event.target.value }))}
                   required
                 />
               </label>

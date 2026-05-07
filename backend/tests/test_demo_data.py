@@ -55,7 +55,7 @@ def test_ensure_demo_data_is_noop_when_lots_exist(monkeypatch, tmp_path):
         name="Existing Warehouse",
         ideal_temp=20.0,
         ideal_humidity=60.0,
-        temp_tolerance=2.0,
+        temperature_tolerance=2.0,
         humidity_tolerance=2.0,
     )
     db.add(warehouse)

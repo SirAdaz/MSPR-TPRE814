@@ -33,9 +33,9 @@ class Warehouse(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     exploitation_id: Mapped[int] = mapped_column(ForeignKey("exploitations.id"), nullable=False)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-    ideal_temp: Mapped[float] = mapped_column(Float, nullable=False)
+    ideal_temperature: Mapped[float] = mapped_column(Float, nullable=False)
     ideal_humidity: Mapped[float] = mapped_column(Float, nullable=False)
-    temp_tolerance: Mapped[float] = mapped_column(Float, default=3.0)
+    temperature_tolerance: Mapped[float] = mapped_column(Float, default=3.0)
     humidity_tolerance: Mapped[float] = mapped_column(Float, default=2.0)
 
     exploitation: Mapped[Exploitation] = relationship(back_populates="warehouses")

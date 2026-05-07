@@ -86,7 +86,7 @@ def simulate_environment(db: Session) -> int:
 
         # Occasional anomaly to trigger auto-control.
         if random.random() < 0.25:
-            temperature += random.uniform(warehouse.temp_tolerance + 0.5, warehouse.temp_tolerance + 3.0)
+            temperature += random.uniform(warehouse.temperature_tolerance + 0.5, warehouse.temperature_tolerance + 3.0)
         if random.random() < 0.20:
             humidity += random.uniform(warehouse.humidity_tolerance + 0.5, warehouse.humidity_tolerance + 6.0)
 
@@ -102,7 +102,7 @@ def simulate_environment(db: Session) -> int:
         evaluate_reading(db, warehouse, reading.temperature, reading.humidity)
 
         # Automatic corrective actions.
-        if reading.temperature > warehouse.ideal_temp + warehouse.temp_tolerance:
+        if reading.temperature > warehouse.ideal_temp + warehouse.temperature_tolerance:
             create_alert(
                 db,
                 warehouse_id=warehouse.id,

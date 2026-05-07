@@ -135,7 +135,7 @@ def test_simulate_environment_with_corrective_actions(monkeypatch):
         name="W1",
         ideal_temp=20.0,
         ideal_humidity=50.0,
-        temp_tolerance=1.0,
+        temperature_tolerance=1.0,
         humidity_tolerance=1.0,
     )
     db = FakeDB(warehouses=[warehouse])

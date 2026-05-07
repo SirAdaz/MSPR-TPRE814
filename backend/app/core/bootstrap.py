@@ -84,6 +84,15 @@ def _run_post_create_migrations() -> None:
             if "actual_dispatch_date" not in lot_columns:
                 conn.execute(text("ALTER TABLE lots ADD COLUMN actual_dispatch_date DATE"))
 
+        if "warehouses" in tables:
+            warehouse_columns = {column["name"] for column in inspector.get_columns("warehouses")}
+            if "temperature_tolerance" not in warehouse_columns:
+                conn.execute(text("ALTER TABLE warehouses ADD COLUMN temperature_tolerance DOUBLE PRECISION"))
+                if "temp_tolerance" in warehouse_columns:
+                    conn.execute(text("UPDATE warehouses SET temperature_tolerance = temp_tolerance WHERE temperature_tolerance IS NULL"))
+                conn.execute(text("UPDATE warehouses SET temperature_tolerance = 3.0 WHERE temperature_tolerance IS NULL"))
+                conn.execute(text("ALTER TABLE warehouses ALTER COLUMN temperature_tolerance SET NOT NULL"))
+
 
 def init_db() -> None:
     _ = (Alert, Country, Exploitation, Lot, SensorReading, Warehouse)

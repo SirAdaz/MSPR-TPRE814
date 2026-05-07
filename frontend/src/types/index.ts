@@ -30,6 +30,6 @@ export interface Warehouse {
   name: string;
   ideal_temp: number;
   ideal_humidity: number;
-  temp_tolerance: number;
+  temperature_tolerance: number;
   humidity_tolerance: number;
 }

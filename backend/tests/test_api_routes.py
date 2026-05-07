@@ -28,7 +28,7 @@ def test_warehouses_create(client):
         "name": "W2",
         "ideal_temp": 25.0,
         "ideal_humidity": 58.0,
-        "temp_tolerance": 2.0,
+        "temperature_tolerance": 2.0,
         "humidity_tolerance": 3.0,
     }
     response = client.post("/api/v1/warehouses", headers=FRONTEND_HEADERS, json=payload)
@@ -44,7 +44,7 @@ def test_warehouses_create_rejects_invalid_humidity(client):
         "name": "W-invalid",
         "ideal_temp": 25.0,
         "ideal_humidity": 120.0,
-        "temp_tolerance": 2.0,
+        "temperature_tolerance": 2.0,
         "humidity_tolerance": 3.0,
     }
     response = client.post("/api/v1/warehouses", headers=FRONTEND_HEADERS, json=payload)

@@ -18,7 +18,7 @@ class WarehouseOut(BaseModel):
     name: str
     ideal_temp: float
     ideal_humidity: float
-    temp_tolerance: float
+    temperature_tolerance: float
     humidity_tolerance: float
 
     class Config:
@@ -39,7 +39,7 @@ class WarehouseCreate(BaseModel):
     name: str = Field(min_length=1, max_length=255)
     ideal_temp: float = Field(ge=-30, le=60)
     ideal_humidity: float = Field(ge=0, le=100)
-    temp_tolerance: float = Field(default=3.0, ge=0, le=20)
+    temperature_tolerance: float = Field(default=3.0, ge=0, le=20)
     humidity_tolerance: float = Field(default=2.0, ge=0, le=100)
 
 
