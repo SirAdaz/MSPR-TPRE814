@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 class ExploitationOut(BaseModel):
     id: int
     name: str
-    country: str
+    country_id: int
 
     class Config:
         from_attributes = True
@@ -20,6 +20,15 @@ class WarehouseOut(BaseModel):
     ideal_humidity: float
     temp_tolerance: float
     humidity_tolerance: float
+
+    class Config:
+        from_attributes = True
+
+
+class CountryOut(BaseModel):
+    id: int
+    code: str
+    name: str
 
     class Config:
         from_attributes = True

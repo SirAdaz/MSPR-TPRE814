@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 
 from app.core.db import Base
 from app.core.demo_data import ensure_demo_data
-from app.models import Alert, Exploitation, Lot, SensorReading, Warehouse
+from app.models import Alert, Country, Exploitation, Lot, SensorReading, Warehouse
 
 
 def test_ensure_demo_data_populates_empty_database(monkeypatch, tmp_path):
@@ -26,7 +26,11 @@ def test_ensure_demo_data_populates_empty_database(monkeypatch, tmp_path):
         assert db.query(Lot).count() == 4
         assert db.query(SensorReading).count() == 4
         assert db.query(Alert).count() == 2
-        assert db.query(Exploitation).first().country == "EC"
+        exploitation = db.query(Exploitation).first()
+        country = db.query(Country).filter(Country.id == exploitation.country_id).first()
+        assert country is not None
+        assert country.code == "ECU"
+        assert country.name == "Equateur"
         assert all(lot.lot_uid.startswith("EC-LOT-") for lot in db.query(Lot).all())
         assert all(lot.planned_dispatch_date is not None for lot in db.query(Lot).all())
     finally:
@@ -40,7 +44,10 @@ def test_ensure_demo_data_is_noop_when_lots_exist(monkeypatch, tmp_path):
     Base.metadata.create_all(bind=engine)
 
     db = session_local()
-    exploitation = Exploitation(name="Existing Exploitation", country="BR")
+    country = Country(code="COL", name="Colombie")
+    db.add(country)
+    db.flush()
+    exploitation = Exploitation(name="Existing Exploitation", country_id=country.id)
     db.add(exploitation)
     db.flush()
     warehouse = Warehouse(

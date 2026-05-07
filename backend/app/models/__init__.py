@@ -1,1 +1,1 @@
-from app.models.entities import Alert, Exploitation, Lot, SensorReading, Warehouse
+from app.models.entities import Alert, Country, Exploitation, Lot, SensorReading, Warehouse

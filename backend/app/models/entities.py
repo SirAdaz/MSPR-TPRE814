@@ -6,13 +6,24 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.db import Base
 
 
+class Country(Base):
+    __tablename__ = "countries"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    code: Mapped[str] = mapped_column(String(3), unique=True, nullable=False)
+    name: Mapped[str] = mapped_column(String(128), nullable=False)
+
+    exploitations: Mapped[list["Exploitation"]] = relationship(back_populates="country")
+
+
 class Exploitation(Base):
     __tablename__ = "exploitations"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-    country: Mapped[str] = mapped_column(String(2), nullable=False)
+    country_id: Mapped[int] = mapped_column(ForeignKey("countries.id"), nullable=False)
 
+    country: Mapped[Country] = relationship(back_populates="exploitations")
     warehouses: Mapped[list["Warehouse"]] = relationship(back_populates="exploitation")
 
 

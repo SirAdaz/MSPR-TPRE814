@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker
 
 from app.core.db import Base, get_db
 from app.main import app
-from app.models import Alert, Exploitation, Lot, SensorReading, Warehouse
+from app.models import Alert, Country, Exploitation, Lot, SensorReading, Warehouse
 
 
 @pytest.fixture()
@@ -28,7 +28,11 @@ def client(monkeypatch, tmp_path):
     monkeypatch.setattr("app.main.init_db", lambda: None)
 
     db = testing_session_local()
-    exploitation = Exploitation(name="Exploit BR", country="BR")
+    country = Country(code="BRA", name="Bresil")
+    db.add(country)
+    db.flush()
+
+    exploitation = Exploitation(name="Exploit BR", country_id=country.id)
     db.add(exploitation)
     db.flush()
 

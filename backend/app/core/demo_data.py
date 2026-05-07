@@ -2,7 +2,19 @@ from datetime import date, datetime, timedelta
 
 from app.core.config import settings
 from app.core.db import SessionLocal
-from app.models import Alert, Exploitation, Lot, SensorReading, Warehouse
+from app.models import Alert, Country, Exploitation, Lot, SensorReading, Warehouse
+
+COUNTRY_NAMES = {
+    "BRA": "Bresil",
+    "ECU": "Equateur",
+    "COL": "Colombie",
+}
+
+COUNTRY_ISO3 = {
+    "BR": "BRA",
+    "EC": "ECU",
+    "CO": "COL",
+}
 
 
 def ensure_demo_data() -> None:
@@ -13,9 +25,17 @@ def ensure_demo_data() -> None:
             return
 
         country = settings.country_code.upper()
+        country_code = COUNTRY_ISO3.get(country, country)
+        country_name = COUNTRY_NAMES.get(country_code, country_code)
+        country_entity = db.query(Country).filter(Country.code == country_code).first()
+        if country_entity is None:
+            country_entity = Country(code=country_code, name=country_name)
+            db.add(country_entity)
+            db.flush()
+
         exploitation = Exploitation(
             name=f"FutureKawa {country} Exploitation",
-            country=country,
+            country_id=country_entity.id,
         )
         db.add(exploitation)
         db.flush()
