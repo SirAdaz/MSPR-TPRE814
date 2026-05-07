@@ -58,4 +58,42 @@ describe("countries api routes env", () => {
       });
     }
   });
+
+  it("uses default FRONTEND_API_KEY fallback when env is missing", async () => {
+    delete process.env.FRONTEND_API_KEY;
+    global.fetch = jest.fn().mockResolvedValue({
+      status: 200,
+      json: async () => [],
+    }) as unknown as typeof fetch;
+
+    const { GET: getAlerts } = await import("@/app/api/countries/[id]/alerts/route");
+    const { GET: getLots } = await import("@/app/api/countries/[id]/lots/route");
+    const { GET: getLotByUid } = await import("@/app/api/countries/[id]/lots/[lotUid]/route");
+    const { GET: getReadings } = await import("@/app/api/countries/[id]/readings/route");
+    const { GET: getWarehouses } = await import("@/app/api/countries/[id]/warehouses/route");
+
+    await getAlerts(new NextRequest("http://localhost/api/countries/BR/alerts"), {
+      params: Promise.resolve({ id: "BR" }),
+    });
+    await getLots(new NextRequest("http://localhost/api/countries/BR/lots"), {
+      params: Promise.resolve({ id: "BR" }),
+    });
+    await getLotByUid(new NextRequest("http://localhost"), {
+      params: Promise.resolve({ id: "BR", lotUid: "LOT-1" }),
+    });
+    await getReadings(new NextRequest("http://localhost/api/countries/BR/readings"), {
+      params: Promise.resolve({ id: "BR" }),
+    });
+    await getWarehouses(new NextRequest("http://localhost"), {
+      params: Promise.resolve({ id: "BR" }),
+    });
+
+    const calls = (global.fetch as jest.Mock).mock.calls;
+    expect(calls.length).toBeGreaterThanOrEqual(5);
+    for (const [, options] of calls) {
+      expect(options).toMatchObject({
+        headers: expect.objectContaining({ "X-Frontend-Key": "front-dev-key" }),
+      });
+    }
+  });
 });

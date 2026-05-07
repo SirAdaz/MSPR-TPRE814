@@ -28,4 +28,26 @@ describe("countryApiMap", () => {
     process.env.BACKEND_EC_URL = previousEc;
     process.env.BACKEND_CO_URL = previousCo;
   });
+
+  it("uses backend fallback urls when env is missing", () => {
+    const previousBr = process.env.BACKEND_BR_URL;
+    const previousEc = process.env.BACKEND_EC_URL;
+    const previousCo = process.env.BACKEND_CO_URL;
+
+    delete process.env.BACKEND_BR_URL;
+    delete process.env.BACKEND_EC_URL;
+    delete process.env.BACKEND_CO_URL;
+
+    jest.resetModules();
+    jest.isolateModules(() => {
+      const { countryApiMap } = require("@/lib/countries");
+      expect(countryApiMap.BR).toBe("http://backend-br:8000");
+      expect(countryApiMap.EC).toBe("http://backend-ec:8000");
+      expect(countryApiMap.CO).toBe("http://backend-co:8000");
+    });
+
+    process.env.BACKEND_BR_URL = previousBr;
+    process.env.BACKEND_EC_URL = previousEc;
+    process.env.BACKEND_CO_URL = previousCo;
+  });
 });

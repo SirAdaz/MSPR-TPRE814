@@ -1,12 +1,13 @@
 /** @jest-environment node */
 
-import { fetchJson } from "@/lib/client";
-
 describe("fetchJson in node runtime", () => {
   const originalFetch = global.fetch;
+  const originalBetterAuthUrl = process.env.BETTER_AUTH_URL;
 
   afterEach(() => {
     global.fetch = originalFetch;
+    process.env.BETTER_AUTH_URL = originalBetterAuthUrl;
+    jest.resetModules();
     jest.restoreAllMocks();
   });
 
@@ -17,6 +18,7 @@ describe("fetchJson in node runtime", () => {
       json: async () => ({ ok: true }),
     }) as unknown as typeof fetch;
 
+    const { fetchJson } = require("@/lib/client");
     await fetchJson<{ ok: boolean }>("/api/test");
     expect(global.fetch).toHaveBeenCalledWith("https://example.local/api/test", { cache: "no-store" });
   });
@@ -28,6 +30,7 @@ describe("fetchJson in node runtime", () => {
       json: async () => ({ ok: true }),
     }) as unknown as typeof fetch;
 
+    const { fetchJson } = require("@/lib/client");
     await fetchJson<{ ok: boolean }>("/api/test");
     expect(global.fetch).toHaveBeenCalledWith("http://localhost:3000/api/test", { cache: "no-store" });
   });
@@ -39,6 +42,7 @@ describe("fetchJson in node runtime", () => {
       json: async () => ({ ok: true }),
     }) as unknown as typeof fetch;
 
+    const { fetchJson } = require("@/lib/client");
     await fetchJson<{ ok: boolean }>("https://service.local/ping");
     expect(global.fetch).toHaveBeenCalledWith("https://service.local/ping", { cache: "no-store" });
   });
