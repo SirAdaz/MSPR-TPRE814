@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import random
+import logging
 from datetime import date, timedelta
 
 from sqlalchemy.orm import Session
@@ -8,6 +9,8 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.models import Lot, SensorReading, Warehouse
 from app.services.alerts import create_alert, evaluate_reading
+
+logger = logging.getLogger(__name__)
 
 
 def _lot_uid(prefix: str) -> str:
@@ -51,8 +54,6 @@ def simulate_truck_movements(db: Session) -> int:
             continue
         lot_uid = oldest_lot.lot_uid
         lot_id = oldest_lot.id
-        db.delete(oldest_lot)
-        db.flush()
         create_alert(
             db,
             warehouse_id=warehouse.id,
@@ -60,9 +61,15 @@ def simulate_truck_movements(db: Session) -> int:
             alert_type="LOGISTICS_DEPARTURE",
             message=f"Truck departure from {warehouse.name}: lot {lot_uid} shipped.",
         )
+        db.delete(oldest_lot)
+        db.flush()
         created_or_shipped += 1
 
     db.commit()
+    logger.info(
+        "simulation_logistics_cycle",
+        extra={"country": settings.country_code, "warehouses": len(warehouses), "events": created_or_shipped},
+    )
     return created_or_shipped
 
 
@@ -126,4 +133,8 @@ def simulate_environment(db: Session) -> int:
             generated += 1
 
     db.commit()
+    logger.info(
+        "simulation_environment_cycle",
+        extra={"country": settings.country_code, "warehouses": len(warehouses), "readings_generated": generated},
+    )
     return generated

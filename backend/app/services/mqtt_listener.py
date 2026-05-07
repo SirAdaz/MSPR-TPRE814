@@ -1,5 +1,6 @@
 import asyncio
 import json
+import logging
 import threading
 
 from aiomqtt import Client
@@ -12,11 +13,14 @@ from app.services.alerts import evaluate_reading
 
 _loop: asyncio.AbstractEventLoop | None = None
 _thread: threading.Thread | None = None
+logger = logging.getLogger(__name__)
 
 
 async def _consume() -> None:
+    logger.info("mqtt_listener_connecting", extra={"host": settings.mqtt_host, "port": settings.mqtt_port, "topic": settings.mqtt_topic})
     async with Client(settings.mqtt_host, settings.mqtt_port) as client:
         await client.subscribe(settings.mqtt_topic)
+        logger.info("mqtt_listener_subscribed", extra={"topic": settings.mqtt_topic})
         async for message in client.messages:
             payload = json.loads(message.payload.decode())
             topic_parts = message.topic.value.split("/")
@@ -39,6 +43,10 @@ async def _consume() -> None:
                 warehouse = db.query(Warehouse).filter(Warehouse.id == warehouse_id).first()
                 if warehouse:
                     evaluate_reading(db, warehouse, temperature, humidity)
+                logger.info(
+                    "mqtt_reading_persisted",
+                    extra={"warehouse_id": warehouse_id, "temperature": temperature, "humidity": humidity},
+                )
             finally:
                 db.close()
 
@@ -53,12 +61,15 @@ def _run_loop() -> None:
 def start_mqtt_listener() -> None:
     global _thread
     if _thread and _thread.is_alive():
+        logger.info("mqtt_listener_already_running")
         return
     _thread = threading.Thread(target=_run_loop, daemon=True)
     _thread.start()
+    logger.info("mqtt_listener_started")
 
 
 def stop_mqtt_listener() -> None:
     global _loop
     if _loop and _loop.is_running():
         _loop.call_soon_threadsafe(_loop.stop)
+        logger.info("mqtt_listener_stopped")

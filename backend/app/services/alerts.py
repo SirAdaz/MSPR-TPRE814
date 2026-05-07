@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import logging
 import smtplib
 from email.message import EmailMessage
 
@@ -6,6 +7,8 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.models import Alert, Lot, Warehouse
+
+logger = logging.getLogger(__name__)
 
 
 def send_alert_email(subject: str, content: str) -> bool:
@@ -17,8 +20,13 @@ def send_alert_email(subject: str, content: str) -> bool:
     try:
         with smtplib.SMTP(settings.smtp_host, settings.smtp_port, timeout=5) as smtp:
             smtp.send_message(msg)
+        logger.info("alert_email_sent", extra={"country": settings.country_code, "subject": subject})
         return True
-    except Exception:
+    except Exception as exc:
+        logger.warning(
+            "alert_email_failed",
+            extra={"country": settings.country_code, "subject": subject, "error": str(exc)},
+        )
         return False
 
 
@@ -34,6 +42,10 @@ def create_alert(db: Session, warehouse_id: int, alert_type: str, message: str, 
     db.add(alert)
     db.commit()
     db.refresh(alert)
+    logger.info(
+        "alert_created",
+        extra={"country": settings.country_code, "warehouse_id": warehouse_id, "alert_type": alert_type, "lot_id": lot_id},
+    )
     return alert
 
 
@@ -42,6 +54,16 @@ def evaluate_reading(db: Session, warehouse: Warehouse, temperature: float, humi
     out_of_humidity = abs(humidity - warehouse.ideal_humidity) > warehouse.humidity_tolerance
     if not out_of_temp and not out_of_humidity:
         return None
+
+    logger.warning(
+        "reading_out_of_range",
+        extra={
+            "country": settings.country_code,
+            "warehouse_id": warehouse.id,
+            "temperature": temperature,
+            "humidity": humidity,
+        },
+    )
 
     msg = (
         f"Warehouse {warehouse.name} ({settings.country_code}) out of range: "
@@ -60,4 +82,8 @@ def check_expired_lots(db: Session) -> int:
         lot.status = "perime"
         created += 1
     db.commit()
+    if created > 0:
+        logger.warning("expired_lots_detected", extra={"country": settings.country_code, "count": created})
+    else:
+        logger.info("expired_lots_check_ok", extra={"country": settings.country_code, "count": 0})
     return created

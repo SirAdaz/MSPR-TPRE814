@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+import logging
 
 from fastapi import FastAPI
 
@@ -9,13 +10,21 @@ from app.core.demo_data import ensure_demo_data
 from app.core.scheduler import scheduler
 from app.services.mqtt_listener import start_mqtt_listener, stop_mqtt_listener
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s [%(name)s] %(message)s",
+)
+logger = logging.getLogger(__name__)
+
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    logger.info("backend_startup", extra={"country": settings.country_code})
     init_db()
     ensure_demo_data()
     if settings.enable_scheduler:
         scheduler.start()
+        logger.info("scheduler_started", extra={"country": settings.country_code})
     if settings.enable_mqtt:
         start_mqtt_listener()
     yield
@@ -23,6 +32,8 @@ async def lifespan(_: FastAPI):
         stop_mqtt_listener()
     if settings.enable_scheduler:
         scheduler.shutdown(wait=False)
+        logger.info("scheduler_stopped", extra={"country": settings.country_code})
+    logger.info("backend_shutdown", extra={"country": settings.country_code})
 
 
 app = FastAPI(
