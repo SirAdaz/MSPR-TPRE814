@@ -147,6 +147,22 @@ describe("countries api routes", () => {
     );
   });
 
+  it("proxies readings with from/to filters", async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      status: 200,
+      json: async () => [],
+    }) as unknown as typeof fetch;
+    const request = new NextRequest(
+      "http://localhost/api/countries/BR/readings?warehouse_id=1&from=2026-01-01T00:00:00&to=2026-01-02T00:00:00",
+    );
+
+    await getReadings(request, { params: Promise.resolve({ id: "BR" }) });
+    expect(global.fetch).toHaveBeenCalledWith(
+      "http://backend-br:8000/api/v1/readings?warehouse_id=1&from=2026-01-01T00%3A00%3A00&to=2026-01-02T00%3A00%3A00",
+      expect.any(Object),
+    );
+  });
+
   it("falls back to BR backend for unknown id on readings", async () => {
     global.fetch = jest.fn().mockResolvedValue({
       status: 200,
