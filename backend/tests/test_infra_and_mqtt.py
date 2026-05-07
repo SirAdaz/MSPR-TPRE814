@@ -34,6 +34,7 @@ def test_init_db_retries_then_succeeds(monkeypatch):
             raise OperationalError("stmt", {}, Exception("db down"))
 
     monkeypatch.setattr(bootstrap.Base.metadata, "create_all", flaky_create_all)
+    monkeypatch.setattr(bootstrap, "_run_post_create_migrations", lambda: None)
     monkeypatch.setattr(bootstrap.time, "sleep", lambda _seconds: None)
     bootstrap.init_db()
     assert calls["count"] == 3
@@ -44,9 +45,89 @@ def test_init_db_raises_last_error_after_retries(monkeypatch):
         raise OperationalError("stmt", {}, Exception("db down"))
 
     monkeypatch.setattr(bootstrap.Base.metadata, "create_all", always_fail)
+    monkeypatch.setattr(bootstrap, "_run_post_create_migrations", lambda: None)
     monkeypatch.setattr(bootstrap.time, "sleep", lambda _seconds: None)
     with pytest.raises(OperationalError):
         bootstrap.init_db()
+
+
+def test_run_post_create_migrations_creates_missing_countries_and_lot_columns(monkeypatch):
+    executed = []
+
+    class FakeInspector:
+        def get_table_names(self):
+            return ["exploitations", "lots"]
+
+        def get_columns(self, table_name):
+            if table_name == "exploitations":
+                return [{"name": "id"}, {"name": "name"}, {"name": "country_id"}]
+            if table_name == "lots":
+                return [{"name": "id"}, {"name": "storage_date"}]
+            return []
+
+    class FakeConnection:
+        def execute(self, statement):
+            executed.append(str(statement))
+
+    class FakeBegin:
+        def __enter__(self):
+            return FakeConnection()
+
+        def __exit__(self, *_args):
+            return None
+
+    class FakeEngine:
+        def begin(self):
+            return FakeBegin()
+
+    monkeypatch.setattr(bootstrap, "inspect", lambda _engine: FakeInspector())
+    monkeypatch.setattr(bootstrap, "engine", FakeEngine())
+
+    bootstrap._run_post_create_migrations()
+
+    assert any("CREATE TABLE countries" in sql for sql in executed)
+    assert any("ALTER TABLE lots ADD COLUMN planned_dispatch_date" in sql for sql in executed)
+    assert any("ALTER TABLE lots ADD COLUMN actual_dispatch_date" in sql for sql in executed)
+
+
+def test_run_post_create_migrations_adds_exploitation_country_id_from_legacy_columns(monkeypatch):
+    executed = []
+
+    class FakeInspector:
+        def get_table_names(self):
+            return ["countries", "exploitations", "lots"]
+
+        def get_columns(self, table_name):
+            if table_name == "exploitations":
+                return [{"name": "id"}, {"name": "country_code"}, {"name": "country_name"}]
+            if table_name == "lots":
+                return [{"name": "id"}, {"name": "storage_date"}, {"name": "planned_dispatch_date"}, {"name": "actual_dispatch_date"}]
+            return []
+
+    class FakeConnection:
+        def execute(self, statement):
+            executed.append(str(statement))
+
+    class FakeBegin:
+        def __enter__(self):
+            return FakeConnection()
+
+        def __exit__(self, *_args):
+            return None
+
+    class FakeEngine:
+        def begin(self):
+            return FakeBegin()
+
+    monkeypatch.setattr(bootstrap, "inspect", lambda _engine: FakeInspector())
+    monkeypatch.setattr(bootstrap, "engine", FakeEngine())
+
+    bootstrap._run_post_create_migrations()
+
+    assert any("ALTER TABLE exploitations ADD COLUMN country_id" in sql for sql in executed)
+    assert any("INSERT INTO countries (code, name)" in sql for sql in executed)
+    assert any("UPDATE exploitations e" in sql for sql in executed)
+    assert any("ALTER TABLE exploitations ALTER COLUMN country_id SET NOT NULL" in sql for sql in executed)
 
 
 def test_scheduler_job_runs_and_closes_session(monkeypatch):
