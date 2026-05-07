@@ -58,8 +58,11 @@ services:
       - ./backend:/app
     environment:
       COUNTRY_CODE: BR
-      ENABLE_SCHEDULER: "false"
+      ENABLE_SCHEDULER: "true"
       ENABLE_MQTT: "false"
+      ENABLE_SIMULATION: "true"
+      SIMULATION_ENVIRONMENT_INTERVAL_SECONDS: 45
+      SIMULATION_LOGISTICS_INTERVAL_SECONDS: 90
       DATABASE_URL: postgresql://futurekawa:futurekawa@postgres-br:5432/futurekawa_br
       FRONTEND_API_KEY: front-dev-key
       SENSOR_API_KEY: sensor-dev-key
@@ -82,8 +85,11 @@ services:
       - ./backend:/app
     environment:
       COUNTRY_CODE: EC
-      ENABLE_SCHEDULER: "false"
+      ENABLE_SCHEDULER: "true"
       ENABLE_MQTT: "false"
+      ENABLE_SIMULATION: "true"
+      SIMULATION_ENVIRONMENT_INTERVAL_SECONDS: 45
+      SIMULATION_LOGISTICS_INTERVAL_SECONDS: 90
       DATABASE_URL: postgresql://futurekawa:futurekawa@postgres-ec:5432/futurekawa_ec
       FRONTEND_API_KEY: front-dev-key
       SENSOR_API_KEY: sensor-dev-key
@@ -106,8 +112,11 @@ services:
       - ./backend:/app
     environment:
       COUNTRY_CODE: CO
-      ENABLE_SCHEDULER: "false"
+      ENABLE_SCHEDULER: "true"
       ENABLE_MQTT: "false"
+      ENABLE_SIMULATION: "true"
+      SIMULATION_ENVIRONMENT_INTERVAL_SECONDS: 45
+      SIMULATION_LOGISTICS_INTERVAL_SECONDS: 90
       DATABASE_URL: postgresql://futurekawa:futurekawa@postgres-co:5432/futurekawa_co
       FRONTEND_API_KEY: front-dev-key
       SENSOR_API_KEY: sensor-dev-key

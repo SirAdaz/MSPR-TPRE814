@@ -9,7 +9,7 @@ Solution distribuee pour le suivi des stocks et conditions de stockage du cafe v
 - Tests: Jest, Cypress, pytest
 - CI/CD: Jenkins pipeline
 
-## Lancement rapide (dev par defaut)
+## Lancement rapide
 ```bash
 docker compose up
 ```

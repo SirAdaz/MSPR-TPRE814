@@ -7,8 +7,11 @@ class Settings(BaseSettings):
     app_env: str = "dev"
     enable_scheduler: bool = False
     enable_mqtt: bool = False
+    enable_simulation: bool = True
     country_code: str = "BR"
     database_url: str = "sqlite:///./futurekawa.db"
+    simulation_environment_interval_seconds: int = 60
+    simulation_logistics_interval_seconds: int = 120
     mqtt_host: str = "mosquitto-br"
     mqtt_port: int = 1883
     mqtt_topic: str = "warehouse/+/sensors"
