@@ -61,6 +61,7 @@ def test_lots_crud_and_validation(client):
     create_response = client.post("/api/v1/lots", headers=FRONTEND_HEADERS, json=create_payload)
     assert create_response.status_code == 200
     assert create_response.json()["lot_uid"] == "LOT-NEW"
+    assert create_response.json()["planned_dispatch_date"] is not None
 
     bad_sort = client.get("/api/v1/lots?sort=name", headers=FRONTEND_HEADERS)
     assert bad_sort.status_code == 400
@@ -68,9 +69,14 @@ def test_lots_crud_and_validation(client):
     read_response = client.get("/api/v1/lots/LOT-NEW", headers=FRONTEND_HEADERS)
     assert read_response.status_code == 200
 
-    update_response = client.put("/api/v1/lots/LOT-NEW", headers=FRONTEND_HEADERS, json={"status": "perime"})
+    update_response = client.put(
+        "/api/v1/lots/LOT-NEW",
+        headers=FRONTEND_HEADERS,
+        json={"status": "perime", "actual_dispatch_date": "2025-01-20"},
+    )
     assert update_response.status_code == 200
     assert update_response.json()["status"] == "perime"
+    assert update_response.json()["actual_dispatch_date"] == "2025-01-20"
 
     delete_response = client.delete("/api/v1/lots/LOT-NEW", headers=FRONTEND_HEADERS)
     assert delete_response.status_code == 200

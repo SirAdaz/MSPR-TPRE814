@@ -38,12 +38,15 @@ class LotCreate(BaseModel):
     lot_uid: str = Field(min_length=1, max_length=255)
     warehouse_id: int = Field(gt=0)
     storage_date: date
+    planned_dispatch_date: date | None = None
     status: str = "conforme"
 
 
 class LotUpdate(BaseModel):
     warehouse_id: int | None = Field(default=None, gt=0)
     storage_date: date | None = None
+    planned_dispatch_date: date | None = None
+    actual_dispatch_date: date | None = None
     status: str | None = None
 
 
@@ -52,6 +55,8 @@ class LotOut(BaseModel):
     lot_uid: str
     warehouse_id: int
     storage_date: date
+    planned_dispatch_date: date | None
+    actual_dispatch_date: date | None
     status: str
 
     class Config:

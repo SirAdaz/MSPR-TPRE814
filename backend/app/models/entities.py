@@ -37,6 +37,8 @@ class Lot(Base):
     lot_uid: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
     warehouse_id: Mapped[int] = mapped_column(ForeignKey("warehouses.id"), nullable=False)
     storage_date: Mapped[date] = mapped_column(Date, nullable=False)
+    planned_dispatch_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    actual_dispatch_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     status: Mapped[str] = mapped_column(String(32), default="conforme")
 
 

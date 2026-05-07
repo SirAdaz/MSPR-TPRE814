@@ -81,7 +81,14 @@ def test_simulate_truck_movements_arrival(monkeypatch):
 
 def test_simulate_truck_movements_departure(monkeypatch):
     warehouse = SimpleNamespace(id=1, name="W1")
-    oldest_lot = SimpleNamespace(id=7, lot_uid="BR-LOT-OLD", warehouse_id=1, status="conforme", storage_date="2026-01-01")
+    oldest_lot = SimpleNamespace(
+        id=7,
+        lot_uid="BR-LOT-OLD",
+        warehouse_id=1,
+        status="conforme",
+        storage_date="2026-01-01",
+        actual_dispatch_date=None,
+    )
     db = FakeDB(warehouses=[warehouse], oldest_lot=oldest_lot)
     created_alerts = []
 
@@ -95,7 +102,9 @@ def test_simulate_truck_movements_departure(monkeypatch):
     events = simulation_service.simulate_truck_movements(db)
 
     assert events == 1
-    assert db.deleted == [oldest_lot]
+    assert db.deleted == []
+    assert oldest_lot.status == "expedie"
+    assert oldest_lot.actual_dispatch_date is not None
     assert created_alerts == ["LOGISTICS_DEPARTURE"]
     assert db.commit_count == 1
 

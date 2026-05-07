@@ -28,6 +28,7 @@ def test_ensure_demo_data_populates_empty_database(monkeypatch, tmp_path):
         assert db.query(Alert).count() == 2
         assert db.query(Exploitation).first().country == "EC"
         assert all(lot.lot_uid.startswith("EC-LOT-") for lot in db.query(Lot).all())
+        assert all(lot.planned_dispatch_date is not None for lot in db.query(Lot).all())
     finally:
         db.close()
 

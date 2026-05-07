@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
@@ -15,7 +17,10 @@ def create_lot(
     db: Session = Depends(get_db),
     _: None = Depends(require_frontend_key),
 ):
-    lot = Lot(**payload.model_dump())
+    data = payload.model_dump()
+    if data.get("planned_dispatch_date") is None:
+        data["planned_dispatch_date"] = data["storage_date"] + timedelta(days=30)
+    lot = Lot(**data)
     db.add(lot)
     db.commit()
     db.refresh(lot)

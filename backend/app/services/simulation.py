@@ -30,6 +30,7 @@ def simulate_truck_movements(db: Session) -> int:
                 lot_uid=_lot_uid(f"{settings.country_code}-LOT"),
                 warehouse_id=warehouse.id,
                 storage_date=date.today(),
+                planned_dispatch_date=date.today() + timedelta(days=30),
                 status="conforme",
             )
             db.add(lot)
@@ -61,7 +62,8 @@ def simulate_truck_movements(db: Session) -> int:
             alert_type="LOGISTICS_DEPARTURE",
             message=f"Truck departure from {warehouse.name}: lot {lot_uid} shipped.",
         )
-        db.delete(oldest_lot)
+        oldest_lot.actual_dispatch_date = date.today()
+        oldest_lot.status = "expedie"
         db.flush()
         created_or_shipped += 1
 

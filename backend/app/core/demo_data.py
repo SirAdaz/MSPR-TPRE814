@@ -44,24 +44,28 @@ def ensure_demo_data() -> None:
                 lot_uid=f"{country}-LOT-001",
                 warehouse_id=warehouse_a.id,
                 storage_date=date.today() - timedelta(days=45),
+                planned_dispatch_date=date.today() - timedelta(days=10),
                 status="conforme",
             ),
             Lot(
                 lot_uid=f"{country}-LOT-002",
                 warehouse_id=warehouse_a.id,
                 storage_date=date.today() - timedelta(days=20),
+                planned_dispatch_date=date.today() + timedelta(days=5),
                 status="risque",
             ),
             Lot(
                 lot_uid=f"{country}-LOT-003",
                 warehouse_id=warehouse_b.id,
                 storage_date=date.today() - timedelta(days=10),
+                planned_dispatch_date=date.today() + timedelta(days=20),
                 status="conforme",
             ),
             Lot(
                 lot_uid=f"{country}-LOT-004",
                 warehouse_id=warehouse_b.id,
                 storage_date=date.today() - timedelta(days=70),
+                planned_dispatch_date=date.today() - timedelta(days=1),
                 status="alerte",
             ),
         ]

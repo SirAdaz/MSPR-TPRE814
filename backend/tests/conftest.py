@@ -47,6 +47,7 @@ def client(monkeypatch, tmp_path):
         lot_uid="LOT-001",
         warehouse_id=warehouse.id,
         storage_date=date(2024, 1, 1),
+        planned_dispatch_date=date(2024, 2, 1),
         status="conforme",
     )
     db.add(lot)

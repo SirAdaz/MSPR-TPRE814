@@ -108,7 +108,7 @@ def evaluate_reading(db: Session, warehouse: Warehouse, temperature: float, humi
 
 def check_expired_lots(db: Session) -> int:
     threshold = datetime.utcnow().date() - timedelta(days=365)
-    expired = db.query(Lot).filter(Lot.storage_date < threshold).all()
+    expired = db.query(Lot).filter(Lot.storage_date < threshold, Lot.actual_dispatch_date.is_(None)).all()
     created = 0
     for lot in expired:
         msg = f"Lot {lot.lot_uid} depasse 365 jours de stockage."
