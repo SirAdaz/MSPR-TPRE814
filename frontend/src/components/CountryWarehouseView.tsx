@@ -6,6 +6,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { LotStatusBadge } from "@/components/LotStatusBadge";
 import { Select } from "@/components/ui/select";
 import { Alert, Lot, Warehouse } from "@/types";
 
@@ -211,7 +212,7 @@ export function CountryWarehouseView({
                 {lots.map((lot) => (
                   <li key={lot.id} className="flex items-center justify-between rounded-md border border-zinc-200 px-3 py-2">
                     <span>{lot.lot_uid}</span>
-                    <span className="text-zinc-500">{lot.status}</span>
+                    <LotStatusBadge status={lot.status} />
                   </li>
                 ))}
               </ul>

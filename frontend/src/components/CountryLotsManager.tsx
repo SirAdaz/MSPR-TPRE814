@@ -6,6 +6,7 @@ import { Pencil, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { LotStatusBadge } from "@/components/LotStatusBadge";
 import { Select } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Lot } from "@/types";
@@ -173,7 +174,9 @@ export function CountryLotsManager({ countryId, selectedWarehouseId }: Props) {
               >
                 <option value="conforme">conforme</option>
                 <option value="alerte">alerte</option>
+                <option value="bientot_perime">bientot_perime</option>
                 <option value="perime">perime</option>
+                <option value="expedie">expedie</option>
               </Select>
             </label>
             <Button className="md:col-span-4" type="submit">Ajouter</Button>
@@ -279,10 +282,12 @@ function LotRow({ lot, editingUid, onStartEdit, onSave, onRequestDelete }: LotRo
           <Select value={editStatus} onChange={(event) => setEditStatus(event.target.value)}>
             <option value="conforme">conforme</option>
             <option value="alerte">alerte</option>
+            <option value="bientot_perime">bientot_perime</option>
             <option value="perime">perime</option>
+            <option value="expedie">expedie</option>
           </Select>
         ) : (
-          lot.status
+          <LotStatusBadge status={lot.status} />
         )}
       </TableCell>
       <TableCell className="space-x-2">

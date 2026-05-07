@@ -12,5 +12,6 @@ describe("LotList", () => {
       />
     );
     expect(screen.getByText(/LOT-1/)).toBeInTheDocument();
+    expect(screen.getByText("Conforme")).toBeInTheDocument();
   });
 });

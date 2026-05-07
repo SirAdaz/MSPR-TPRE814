@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { CountryWarehouseView } from "@/components/CountryWarehouseView";
+import { LotStatusBadge } from "@/components/LotStatusBadge";
 import { PageHeaderNav } from "@/components/PageHeaderNav";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -73,7 +74,7 @@ export default async function CountryPage({ params, searchParams }: Props) {
                 {lots.map((lot) => (
                   <li key={lot.id} className="flex items-center justify-between rounded-md border border-zinc-200 px-3 py-2">
                     <span>{lot.lot_uid}</span>
-                    <span className="text-zinc-500">{lot.status}</span>
+                    <LotStatusBadge status={lot.status} />
                   </li>
                 ))}
               </ul>
