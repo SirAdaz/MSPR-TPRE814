@@ -39,11 +39,11 @@ async function ensureAdminUser() {
       email: ADMIN_EMAIL,
       password: ADMIN_PASSWORD,
       name: ADMIN_NAME,
-      role: "admin",
     }),
   });
 
   if (response.ok) {
+    await ensureAdminRole();
     console.log(`[init-admin-user] demo admin ensured: ${ADMIN_EMAIL}`);
     return;
   }
@@ -51,11 +51,27 @@ async function ensureAdminUser() {
   const body = await response.text();
   const lowerBody = body.toLowerCase();
   if (lowerBody.includes("already") || lowerBody.includes("exists")) {
+    await ensureAdminRole();
     console.log(`[init-admin-user] demo admin already exists: ${ADMIN_EMAIL}`);
     return;
   }
 
   console.error(`[init-admin-user] failed (${response.status}): ${body}`);
+}
+
+async function ensureAdminRole() {
+  const pgModule = await import("pg");
+  const PgClient = pgModule.Client ?? pgModule.default?.Client;
+  if (!PgClient) {
+    throw new Error("pg Client constructor unavailable");
+  }
+  const client = new PgClient({ connectionString: process.env.AUTH_DATABASE_URL });
+  await client.connect();
+  try {
+    await client.query('UPDATE "user" SET "role" = $1 WHERE "email" = $2', ["admin", ADMIN_EMAIL]);
+  } finally {
+    await client.end();
+  }
 }
 
 void ensureAdminUser().catch((error) => {

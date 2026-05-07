@@ -20,12 +20,10 @@ export default function LoginPage() {
 
     let result = await authClient.signIn.email({ email, password });
     if (result.error) {
-      const isDefaultAdmin = email === (process.env.NEXT_PUBLIC_DEFAULT_ADMIN_EMAIL ?? "admin@futurekawa.local");
       const signUp = await authClient.signUp.email({
         email,
         password,
         name: "Admin",
-        role: isDefaultAdmin ? "admin" : "user",
       });
       if (signUp.error) {
         setError(result.error.message ?? "Connexion impossible");
