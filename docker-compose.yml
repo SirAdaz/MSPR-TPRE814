@@ -128,6 +128,16 @@ services:
       - "1025:1025"
       - "8025:8025"
 
+  jenkins:
+    image: jenkins/jenkins:lts-jdk17
+    user: root
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+
   frontend:
     image: node:20
     command: sh -c "npm install && until npx prisma migrate deploy; do echo 'Waiting for auth database...' && sleep 2; done && npx prisma generate && npm run dev -- --hostname 0.0.0.0 --port 3000 & NEXT_PID=$$! && node ./scripts/init-admin-user.mjs && wait $$NEXT_PID"
@@ -152,3 +162,6 @@ services:
       - backend-co
     ports:
       - "3000:3000"
+
+volumes:
+  jenkins_home:
