@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.core.db import get_db
 from app.core.security import require_frontend_key
-from app.models import AlertCapteur, AlertLot
+from app.models import AlertCapteur, AlertLot, Lot
 from app.schemas.entities import AlertOut
 
 router = APIRouter()
@@ -22,9 +22,10 @@ def list_alerts(
         sensor_query = sensor_query.filter(AlertCapteur.warehouse_id == warehouse_id)
     sensor_alerts = sensor_query.order_by(AlertCapteur.created_at.desc()).offset(offset).limit(limit).all()
 
-    # Lot alerts do not carry warehouse_id in the MCD. For API convenience we still support listing them.
-    lot_query = db.query(AlertLot)
-    lot_alerts = lot_query.order_by(AlertLot.created_at.desc()).offset(offset).limit(limit).all()
+    lot_query = db.query(AlertLot, Lot.warehouse_id).join(Lot, Lot.id == AlertLot.lot_id)
+    if warehouse_id is not None:
+        lot_query = lot_query.filter(Lot.warehouse_id == warehouse_id)
+    lot_rows = lot_query.order_by(AlertLot.created_at.desc()).offset(offset).limit(limit).all()
 
     merged: list[AlertOut] = []
     for a in sensor_alerts:
@@ -39,16 +40,16 @@ def list_alerts(
                 created_at=a.created_at,
             )
         )
-    for a in lot_alerts:
+    for alert, lot_warehouse_id in lot_rows:
         merged.append(
             AlertOut(
-                id=a.id,
-                warehouse_id=None,
-                lot_id=a.lot_id,
-                alert_type=a.alert_type,
-                message=a.message,
-                email_sent=a.email_sent,
-                created_at=a.created_at,
+                id=alert.id,
+                warehouse_id=lot_warehouse_id,
+                lot_id=alert.lot_id,
+                alert_type=alert.alert_type,
+                message=alert.message,
+                email_sent=alert.email_sent,
+                created_at=alert.created_at,
             )
         )
 
