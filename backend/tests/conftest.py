@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker
 
 from app.core.db import Base, get_db
 from app.main import app
-from app.models import Alert, Country, Exploitation, Lot, SensorReading, Warehouse
+from app.models import AlertLot, Country, Exploitation, Lot, SensorReading, Warehouse
 
 
 @pytest.fixture()
@@ -39,10 +39,12 @@ def client(monkeypatch, tmp_path):
     warehouse = Warehouse(
         exploitation_id=exploitation.id,
         name="W1",
-        ideal_temp=29.0,
+        ideal_temperature=29.0,
         ideal_humidity=55.0,
-        temperature_tolerance=3.0,
-        humidity_tolerance=2.0,
+        temperature_tolerance_low=3.0,
+        temperature_tolerance_high=3.0,
+        humidity_tolerance_low=2.0,
+        humidity_tolerance_high=2.0,
     )
     db.add(warehouse)
     db.flush()
@@ -65,8 +67,7 @@ def client(monkeypatch, tmp_path):
     )
     db.add(reading)
 
-    alert = Alert(
-        warehouse_id=warehouse.id,
+    alert = AlertLot(
         lot_id=lot.id,
         alert_type="EXPIRATION",
         message="expired",

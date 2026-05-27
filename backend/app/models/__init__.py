@@ -1,1 +1,9 @@
-from app.models.entities import Alert, Country, Exploitation, Lot, SensorReading, Warehouse
+from app.models.entities import (
+    AlertCapteur,
+    AlertLot,
+    Country,
+    Exploitation,
+    Lot,
+    SensorReading,
+    Warehouse,
+)

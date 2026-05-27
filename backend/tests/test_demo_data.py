@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 
 from app.core.db import Base
 from app.core.demo_data import ensure_demo_data
-from app.models import Alert, Country, Exploitation, Lot, SensorReading, Warehouse
+from app.models import AlertCapteur, AlertLot, Country, Exploitation, Lot, SensorReading, Warehouse
 
 
 def test_ensure_demo_data_populates_empty_database(monkeypatch, tmp_path):
@@ -25,7 +25,7 @@ def test_ensure_demo_data_populates_empty_database(monkeypatch, tmp_path):
         assert db.query(Warehouse).count() == 2
         assert db.query(Lot).count() == 4
         assert db.query(SensorReading).count() == 4
-        assert db.query(Alert).count() == 2
+        assert db.query(AlertLot).count() + db.query(AlertCapteur).count() == 2
         exploitation = db.query(Exploitation).first()
         country = db.query(Country).filter(Country.id == exploitation.country_id).first()
         assert country is not None
@@ -53,10 +53,12 @@ def test_ensure_demo_data_is_noop_when_lots_exist(monkeypatch, tmp_path):
     warehouse = Warehouse(
         exploitation_id=exploitation.id,
         name="Existing Warehouse",
-        ideal_temp=20.0,
+        ideal_temperature=20.0,
         ideal_humidity=60.0,
-        temperature_tolerance=2.0,
-        humidity_tolerance=2.0,
+        temperature_tolerance_low=2.0,
+        temperature_tolerance_high=2.0,
+        humidity_tolerance_low=2.0,
+        humidity_tolerance_high=2.0,
     )
     db.add(warehouse)
     db.flush()
@@ -82,7 +84,7 @@ def test_ensure_demo_data_is_noop_when_lots_exist(monkeypatch, tmp_path):
         assert db.query(Warehouse).count() == 1
         assert db.query(Lot).count() == 1
         assert db.query(SensorReading).count() == 0
-        assert db.query(Alert).count() == 0
+        assert db.query(AlertLot).count() + db.query(AlertCapteur).count() == 0
         assert db.query(Lot).first().lot_uid == "EXISTING-LOT-001"
     finally:
         db.close()

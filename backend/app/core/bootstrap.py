@@ -4,7 +4,7 @@ from sqlalchemy import inspect, text
 from sqlalchemy.exc import OperationalError
 
 from app.core.db import Base, engine
-from app.models import Alert, Country, Exploitation, Lot, SensorReading, Warehouse
+from app.models import AlertCapteur, AlertLot, Country, Exploitation, Lot, SensorReading, Warehouse
 
 
 def _run_post_create_migrations() -> None:
@@ -86,16 +86,58 @@ def _run_post_create_migrations() -> None:
 
         if "warehouses" in tables:
             warehouse_columns = {column["name"] for column in inspector.get_columns("warehouses")}
-            if "temperature_tolerance" not in warehouse_columns:
-                conn.execute(text("ALTER TABLE warehouses ADD COLUMN temperature_tolerance DOUBLE PRECISION"))
-                if "temp_tolerance" in warehouse_columns:
-                    conn.execute(text("UPDATE warehouses SET temperature_tolerance = temp_tolerance WHERE temperature_tolerance IS NULL"))
-                conn.execute(text("UPDATE warehouses SET temperature_tolerance = 3.0 WHERE temperature_tolerance IS NULL"))
-                conn.execute(text("ALTER TABLE warehouses ALTER COLUMN temperature_tolerance SET NOT NULL"))
+            # Backward compatibility: legacy schema used single tolerance fields.
+            if "temperature_tolerance_low" not in warehouse_columns:
+                conn.execute(text("ALTER TABLE warehouses ADD COLUMN temperature_tolerance_low DOUBLE PRECISION"))
+                if "temperature_tolerance" in warehouse_columns:
+                    conn.execute(
+                        text(
+                            "UPDATE warehouses SET temperature_tolerance_low = temperature_tolerance "
+                            "WHERE temperature_tolerance_low IS NULL"
+                        )
+                    )
+                conn.execute(text("UPDATE warehouses SET temperature_tolerance_low = 3.0 WHERE temperature_tolerance_low IS NULL"))
+                conn.execute(text("ALTER TABLE warehouses ALTER COLUMN temperature_tolerance_low SET NOT NULL"))
+
+            if "temperature_tolerance_high" not in warehouse_columns:
+                conn.execute(text("ALTER TABLE warehouses ADD COLUMN temperature_tolerance_high DOUBLE PRECISION"))
+                if "temperature_tolerance" in warehouse_columns:
+                    conn.execute(
+                        text(
+                            "UPDATE warehouses SET temperature_tolerance_high = temperature_tolerance "
+                            "WHERE temperature_tolerance_high IS NULL"
+                        )
+                    )
+                conn.execute(text("UPDATE warehouses SET temperature_tolerance_high = 3.0 WHERE temperature_tolerance_high IS NULL"))
+                conn.execute(text("ALTER TABLE warehouses ALTER COLUMN temperature_tolerance_high SET NOT NULL"))
+
+            if "humidity_tolerance_low" not in warehouse_columns:
+                conn.execute(text("ALTER TABLE warehouses ADD COLUMN humidity_tolerance_low DOUBLE PRECISION"))
+                if "humidity_tolerance" in warehouse_columns:
+                    conn.execute(
+                        text(
+                            "UPDATE warehouses SET humidity_tolerance_low = humidity_tolerance "
+                            "WHERE humidity_tolerance_low IS NULL"
+                        )
+                    )
+                conn.execute(text("UPDATE warehouses SET humidity_tolerance_low = 2.0 WHERE humidity_tolerance_low IS NULL"))
+                conn.execute(text("ALTER TABLE warehouses ALTER COLUMN humidity_tolerance_low SET NOT NULL"))
+
+            if "humidity_tolerance_high" not in warehouse_columns:
+                conn.execute(text("ALTER TABLE warehouses ADD COLUMN humidity_tolerance_high DOUBLE PRECISION"))
+                if "humidity_tolerance" in warehouse_columns:
+                    conn.execute(
+                        text(
+                            "UPDATE warehouses SET humidity_tolerance_high = humidity_tolerance "
+                            "WHERE humidity_tolerance_high IS NULL"
+                        )
+                    )
+                conn.execute(text("UPDATE warehouses SET humidity_tolerance_high = 2.0 WHERE humidity_tolerance_high IS NULL"))
+                conn.execute(text("ALTER TABLE warehouses ALTER COLUMN humidity_tolerance_high SET NOT NULL"))
 
 
 def init_db() -> None:
-    _ = (Alert, Country, Exploitation, Lot, SensorReading, Warehouse)
+    _ = (AlertCapteur, AlertLot, Country, Exploitation, Lot, SensorReading, Warehouse)
     retries = 20
     delay_seconds = 1
     last_error: Exception | None = None

@@ -90,8 +90,8 @@ def test_run_post_create_migrations_creates_missing_countries_and_lot_columns(mo
     assert any("CREATE TABLE countries" in sql for sql in executed)
     assert any("ALTER TABLE lots ADD COLUMN planned_dispatch_date" in sql for sql in executed)
     assert any("ALTER TABLE lots ADD COLUMN actual_dispatch_date" in sql for sql in executed)
-    assert any("ALTER TABLE warehouses ADD COLUMN temperature_tolerance" in sql for sql in executed)
-    assert any("UPDATE warehouses SET temperature_tolerance = temp_tolerance" in sql for sql in executed)
+    assert any("ALTER TABLE warehouses ADD COLUMN temperature_tolerance_low" in sql for sql in executed)
+    assert any("ALTER TABLE warehouses ADD COLUMN temperature_tolerance_high" in sql for sql in executed)
 
 
 def test_run_post_create_migrations_adds_exploitation_country_id_from_legacy_columns(monkeypatch):

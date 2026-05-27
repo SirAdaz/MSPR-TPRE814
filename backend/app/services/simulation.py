@@ -81,14 +81,20 @@ def simulate_environment(db: Session) -> int:
 
     for warehouse in warehouses:
         # Baseline around the configured target.
-        temperature = random.uniform(warehouse.ideal_temp - 1.5, warehouse.ideal_temp + 1.5)
+        temperature = random.uniform(warehouse.ideal_temperature - 1.5, warehouse.ideal_temperature + 1.5)
         humidity = random.uniform(warehouse.ideal_humidity - 3.0, warehouse.ideal_humidity + 3.0)
 
         # Occasional anomaly to trigger auto-control.
         if random.random() < 0.25:
-            temperature += random.uniform(warehouse.temperature_tolerance + 0.5, warehouse.temperature_tolerance + 3.0)
+            temperature += random.uniform(
+                warehouse.temperature_tolerance_high + 0.5,
+                warehouse.temperature_tolerance_high + 3.0,
+            )
         if random.random() < 0.20:
-            humidity += random.uniform(warehouse.humidity_tolerance + 0.5, warehouse.humidity_tolerance + 6.0)
+            humidity += random.uniform(
+                warehouse.humidity_tolerance_high + 0.5,
+                warehouse.humidity_tolerance_high + 6.0,
+            )
 
         reading = SensorReading(
             warehouse_id=warehouse.id,
@@ -102,7 +108,7 @@ def simulate_environment(db: Session) -> int:
         evaluate_reading(db, warehouse, reading.temperature, reading.humidity)
 
         # Automatic corrective actions.
-        if reading.temperature > warehouse.ideal_temp + warehouse.temperature_tolerance:
+        if reading.temperature > warehouse.ideal_temperature + warehouse.temperature_tolerance_high:
             create_alert(
                 db,
                 warehouse_id=warehouse.id,
@@ -111,14 +117,17 @@ def simulate_environment(db: Session) -> int:
             )
             corrected = SensorReading(
                 warehouse_id=warehouse.id,
-                temperature=round(max(warehouse.ideal_temp, reading.temperature - random.uniform(1.5, 3.5)), 2),
+                temperature=round(
+                    max(warehouse.ideal_temperature, reading.temperature - random.uniform(1.5, 3.5)),
+                    2,
+                ),
                 humidity=round(reading.humidity, 2),
             )
             db.add(corrected)
             db.flush()
             generated += 1
 
-        if reading.humidity > warehouse.ideal_humidity + warehouse.humidity_tolerance:
+        if reading.humidity > warehouse.ideal_humidity + warehouse.humidity_tolerance_high:
             create_alert(
                 db,
                 warehouse_id=warehouse.id,

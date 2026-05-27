@@ -16,7 +16,7 @@ export interface SensorReading {
 
 export interface Alert {
   id: number;
-  warehouse_id: number;
+  warehouse_id: number | null;
   lot_id: number | null;
   alert_type: string;
   message: string;
@@ -28,8 +28,10 @@ export interface Warehouse {
   id: number;
   exploitation_id: number;
   name: string;
-  ideal_temp: number;
+  ideal_temperature: number;
   ideal_humidity: number;
-  temperature_tolerance: number;
-  humidity_tolerance: number;
+  temperature_tolerance_low: number;
+  temperature_tolerance_high: number;
+  humidity_tolerance_low: number;
+  humidity_tolerance_high: number;
 }

@@ -133,10 +133,12 @@ def test_simulate_environment_with_corrective_actions(monkeypatch):
     warehouse = SimpleNamespace(
         id=1,
         name="W1",
-        ideal_temp=20.0,
+        ideal_temperature=20.0,
         ideal_humidity=50.0,
-        temperature_tolerance=1.0,
-        humidity_tolerance=1.0,
+        temperature_tolerance_low=1.0,
+        temperature_tolerance_high=1.0,
+        humidity_tolerance_low=1.0,
+        humidity_tolerance_high=1.0,
     )
     db = FakeDB(warehouses=[warehouse])
     created_alerts = []

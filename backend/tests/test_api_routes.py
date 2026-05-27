@@ -26,10 +26,12 @@ def test_warehouses_create(client):
     payload = {
         "exploitation_id": 1,
         "name": "W2",
-        "ideal_temp": 25.0,
+        "ideal_temperature": 25.0,
         "ideal_humidity": 58.0,
-        "temperature_tolerance": 2.0,
-        "humidity_tolerance": 3.0,
+        "temperature_tolerance_low": 2.0,
+        "temperature_tolerance_high": 2.0,
+        "humidity_tolerance_low": 3.0,
+        "humidity_tolerance_high": 3.0,
     }
     response = client.post("/api/v1/warehouses", headers=FRONTEND_HEADERS, json=payload)
     assert response.status_code == 200
@@ -42,10 +44,12 @@ def test_warehouses_create_rejects_invalid_humidity(client):
     payload = {
         "exploitation_id": 1,
         "name": "W-invalid",
-        "ideal_temp": 25.0,
+        "ideal_temperature": 25.0,
         "ideal_humidity": 120.0,
-        "temperature_tolerance": 2.0,
-        "humidity_tolerance": 3.0,
+        "temperature_tolerance_low": 2.0,
+        "temperature_tolerance_high": 2.0,
+        "humidity_tolerance_low": 3.0,
+        "humidity_tolerance_high": 3.0,
     }
     response = client.post("/api/v1/warehouses", headers=FRONTEND_HEADERS, json=payload)
     assert response.status_code == 422

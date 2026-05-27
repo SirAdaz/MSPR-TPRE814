@@ -12,10 +12,12 @@ import { Alert, Lot, Warehouse } from "@/types";
 
 type WarehouseForm = {
   name: string;
-  ideal_temp: string;
+  ideal_temperature: string;
   ideal_humidity: string;
-  temperature_tolerance: string;
-  humidity_tolerance: string;
+  temperature_tolerance_low: string;
+  temperature_tolerance_high: string;
+  humidity_tolerance_low: string;
+  humidity_tolerance_high: string;
 };
 
 type Props = {
@@ -29,10 +31,12 @@ type Props = {
 
 const DEFAULT_FORM: WarehouseForm = {
   name: "",
-  ideal_temp: "",
+  ideal_temperature: "",
   ideal_humidity: "",
-  temperature_tolerance: "",
-  humidity_tolerance: "",
+  temperature_tolerance_low: "",
+  temperature_tolerance_high: "",
+  humidity_tolerance_low: "",
+  humidity_tolerance_high: "",
 };
 
 export function CountryWarehouseView({
@@ -79,10 +83,12 @@ export function CountryWarehouseView({
         body: JSON.stringify({
           exploitation_id: warehouses[0].exploitation_id,
           name: form.name,
-          ideal_temp: Number(form.ideal_temp),
+          ideal_temperature: Number(form.ideal_temperature),
           ideal_humidity: Number(form.ideal_humidity),
-          temperature_tolerance: Number(form.temperature_tolerance),
-          humidity_tolerance: Number(form.humidity_tolerance),
+          temperature_tolerance_low: Number(form.temperature_tolerance_low),
+          temperature_tolerance_high: Number(form.temperature_tolerance_high),
+          humidity_tolerance_low: Number(form.humidity_tolerance_low),
+          humidity_tolerance_high: Number(form.humidity_tolerance_high),
         }),
       });
       if (!response.ok) {
@@ -118,8 +124,8 @@ export function CountryWarehouseView({
           </Select>
           {selectedWarehouse ? (
             <p className="text-sm text-zinc-600">
-              Seuils {selectedWarehouse.name} - Temp {selectedWarehouse.ideal_temp} +/- {selectedWarehouse.temperature_tolerance}
-              {" "} C, Humidite {selectedWarehouse.ideal_humidity} +/- {selectedWarehouse.humidity_tolerance}%
+              Seuils {selectedWarehouse.name} - Temp {selectedWarehouse.ideal_temperature} (-{selectedWarehouse.temperature_tolerance_low}/+{selectedWarehouse.temperature_tolerance_high})
+              {" "} C, Humidite {selectedWarehouse.ideal_humidity} (-{selectedWarehouse.humidity_tolerance_low}/+{selectedWarehouse.humidity_tolerance_high})%
             </p>
           ) : (
             <p className="text-sm text-zinc-600">
@@ -152,8 +158,8 @@ export function CountryWarehouseView({
                   type="number"
                   step="0.1"
                   placeholder="Ex: 18.5"
-                  value={form.ideal_temp}
-                  onChange={(event) => setForm((prev) => ({ ...prev, ideal_temp: event.target.value }))}
+                  value={form.ideal_temperature}
+                  onChange={(event) => setForm((prev) => ({ ...prev, ideal_temperature: event.target.value }))}
                   required
                 />
               </label>
@@ -169,24 +175,46 @@ export function CountryWarehouseView({
                 />
               </label>
               <label className="space-y-1 text-sm">
-                <span className="text-zinc-700">Tolerance temperature (C) <span className="text-red-600">*</span></span>
+                <span className="text-zinc-700">Tolerance temperature basse (C) <span className="text-red-600">*</span></span>
                 <Input
                   type="number"
                   step="0.1"
                   placeholder="Ex: 3"
-                  value={form.temperature_tolerance}
-                  onChange={(event) => setForm((prev) => ({ ...prev, temperature_tolerance: event.target.value }))}
+                  value={form.temperature_tolerance_low}
+                  onChange={(event) => setForm((prev) => ({ ...prev, temperature_tolerance_low: event.target.value }))}
                   required
                 />
               </label>
               <label className="space-y-1 text-sm md:col-span-2">
-                <span className="text-zinc-700">Tolerance humidite (%) <span className="text-red-600">*</span></span>
+                <span className="text-zinc-700">Tolerance temperature haute (C) <span className="text-red-600">*</span></span>
+                <Input
+                  type="number"
+                  step="0.1"
+                  placeholder="Ex: 3"
+                  value={form.temperature_tolerance_high}
+                  onChange={(event) => setForm((prev) => ({ ...prev, temperature_tolerance_high: event.target.value }))}
+                  required
+                />
+              </label>
+              <label className="space-y-1 text-sm">
+                <span className="text-zinc-700">Tolerance humidite basse (%) <span className="text-red-600">*</span></span>
                 <Input
                   type="number"
                   step="0.1"
                   placeholder="Ex: 5"
-                  value={form.humidity_tolerance}
-                  onChange={(event) => setForm((prev) => ({ ...prev, humidity_tolerance: event.target.value }))}
+                  value={form.humidity_tolerance_low}
+                  onChange={(event) => setForm((prev) => ({ ...prev, humidity_tolerance_low: event.target.value }))}
+                  required
+                />
+              </label>
+              <label className="space-y-1 text-sm md:col-span-2">
+                <span className="text-zinc-700">Tolerance humidite haute (%) <span className="text-red-600">*</span></span>
+                <Input
+                  type="number"
+                  step="0.1"
+                  placeholder="Ex: 5"
+                  value={form.humidity_tolerance_high}
+                  onChange={(event) => setForm((prev) => ({ ...prev, humidity_tolerance_high: event.target.value }))}
                   required
                 />
               </label>

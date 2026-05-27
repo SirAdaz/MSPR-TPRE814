@@ -105,7 +105,7 @@ def test_check_expired_lots_marks_soon_status_without_duplicates(client, monkeyp
     monkeypatch.setattr(alerts_service, "send_alert_email", lambda *_args, **_kwargs: False)
     from app.core.db import get_db
     from app.main import app
-    from app.models import Alert
+    from app.models import AlertLot
 
     db_gen = app.dependency_overrides[get_db]()
     db = next(db_gen)
@@ -128,8 +128,8 @@ def test_check_expired_lots_marks_soon_status_without_duplicates(client, monkeyp
 
     _ = alerts_service.check_expired_lots(db)
     soon_alerts = (
-        db.query(Alert)
-        .filter(Alert.lot_id == refreshed.id, Alert.alert_type == "EXPIRATION_SOON")
+        db.query(AlertLot)
+        .filter(AlertLot.lot_id == refreshed.id, AlertLot.alert_type == "EXPIRATION_SOON")
         .all()
     )
     assert len(soon_alerts) == 1

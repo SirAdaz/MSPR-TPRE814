@@ -16,10 +16,12 @@ class WarehouseOut(BaseModel):
     id: int
     exploitation_id: int
     name: str
-    ideal_temp: float
+    ideal_temperature: float
     ideal_humidity: float
-    temperature_tolerance: float
-    humidity_tolerance: float
+    temperature_tolerance_low: float
+    temperature_tolerance_high: float
+    humidity_tolerance_low: float
+    humidity_tolerance_high: float
 
     class Config:
         from_attributes = True
@@ -37,10 +39,12 @@ class CountryOut(BaseModel):
 class WarehouseCreate(BaseModel):
     exploitation_id: int = Field(gt=0)
     name: str = Field(min_length=1, max_length=255)
-    ideal_temp: float = Field(ge=-30, le=60)
+    ideal_temperature: float = Field(ge=-30, le=60)
     ideal_humidity: float = Field(ge=0, le=100)
-    temperature_tolerance: float = Field(default=3.0, ge=0, le=20)
-    humidity_tolerance: float = Field(default=2.0, ge=0, le=100)
+    temperature_tolerance_low: float = Field(default=3.0, ge=0, le=20)
+    temperature_tolerance_high: float = Field(default=3.0, ge=0, le=20)
+    humidity_tolerance_low: float = Field(default=2.0, ge=0, le=100)
+    humidity_tolerance_high: float = Field(default=2.0, ge=0, le=100)
 
 
 class LotCreate(BaseModel):
@@ -91,7 +95,8 @@ class SensorReadingCreate(BaseModel):
 
 class AlertOut(BaseModel):
     id: int
-    warehouse_id: int
+    # Union of AlertLot / AlertCapteur for API convenience.
+    warehouse_id: int | None
     lot_id: int | None
     alert_type: str
     message: str

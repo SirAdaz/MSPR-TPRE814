@@ -5,9 +5,9 @@ from sqlalchemy import engine_from_config, pool
 
 from app.core.config import settings
 from app.core.db import Base
-from app.models import Alert, Exploitation, Lot, SensorReading, Warehouse
+from app.models import AlertCapteur, AlertLot, Exploitation, Lot, SensorReading, Warehouse
 
-_ = (Alert, Exploitation, Lot, SensorReading, Warehouse)
+_ = (AlertCapteur, AlertLot, Exploitation, Lot, SensorReading, Warehouse)
 
 config = context.config
 config.set_main_option("sqlalchemy.url", settings.database_url)

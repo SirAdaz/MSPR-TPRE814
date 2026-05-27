@@ -2,7 +2,7 @@ from datetime import date, datetime, timedelta
 
 from app.core.config import settings
 from app.core.db import SessionLocal
-from app.models import Alert, Country, Exploitation, Lot, SensorReading, Warehouse
+from app.models import AlertCapteur, AlertLot, Country, Exploitation, Lot, SensorReading, Warehouse
 
 COUNTRY_NAMES = {
     "BRA": "Bresil",
@@ -43,18 +43,22 @@ def ensure_demo_data() -> None:
         warehouse_a = Warehouse(
             exploitation_id=exploitation.id,
             name=f"Warehouse {country}-A",
-            ideal_temp=18.5,
+            ideal_temperature=18.5,
             ideal_humidity=60.0,
-            temperature_tolerance=3.0,
-            humidity_tolerance=5.0,
+            temperature_tolerance_low=3.0,
+            temperature_tolerance_high=3.0,
+            humidity_tolerance_low=5.0,
+            humidity_tolerance_high=5.0,
         )
         warehouse_b = Warehouse(
             exploitation_id=exploitation.id,
             name=f"Warehouse {country}-B",
-            ideal_temp=19.0,
+            ideal_temperature=19.0,
             ideal_humidity=58.0,
-            temperature_tolerance=3.0,
-            humidity_tolerance=5.0,
+            temperature_tolerance_low=3.0,
+            temperature_tolerance_high=3.0,
+            humidity_tolerance_low=5.0,
+            humidity_tolerance_high=5.0,
         )
         db.add_all([warehouse_a, warehouse_b])
         db.flush()
@@ -122,19 +126,17 @@ def ensure_demo_data() -> None:
         db.add_all(readings)
 
         alerts = [
-            Alert(
-                warehouse_id=warehouse_a.id,
+            AlertLot(
                 lot_id=lots[1].id,
                 alert_type="temperature_high",
                 message=f"{country} lot {lots[1].lot_uid}: temperature above tolerance",
                 email_sent=False,
                 created_at=now - timedelta(minutes=45),
             ),
-            Alert(
+            AlertCapteur(
                 warehouse_id=warehouse_b.id,
-                lot_id=lots[3].id,
                 alert_type="humidity_high",
-                message=f"{country} lot {lots[3].lot_uid}: humidity above tolerance",
+                message=f"{country} warehouse {warehouse_b.name}: humidity above tolerance",
                 email_sent=False,
                 created_at=now - timedelta(minutes=20),
             ),

@@ -6,7 +6,7 @@ from email.message import EmailMessage
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.models import Alert, Lot, Warehouse
+from app.models import AlertCapteur, AlertLot, Lot, Warehouse
 
 logger = logging.getLogger(__name__)
 
@@ -48,16 +48,26 @@ def _is_alert_in_cooldown(db: Session, warehouse_id: int, alert_type: str) -> bo
         return False
 
     threshold = datetime.utcnow() - timedelta(seconds=settings.alert_cooldown_seconds)
-    latest_alert = (
-        db.query(Alert)
-        .filter(Alert.warehouse_id == warehouse_id, Alert.alert_type == alert_type)
-        .order_by(Alert.created_at.desc())
+    latest_sensor_alert = (
+        db.query(AlertCapteur)
+        .filter(AlertCapteur.warehouse_id == warehouse_id, AlertCapteur.alert_type == alert_type)
+        .order_by(AlertCapteur.created_at.desc())
         .first()
     )
+    latest_lot_alert = (
+        db.query(AlertLot)
+        .join(Lot, Lot.id == AlertLot.lot_id)
+        .filter(Lot.warehouse_id == warehouse_id, AlertLot.alert_type == alert_type)
+        .order_by(AlertLot.created_at.desc())
+        .first()
+    )
+    latest_alert = latest_sensor_alert
+    if latest_alert is None or (latest_lot_alert is not None and latest_lot_alert.created_at > latest_alert.created_at):
+        latest_alert = latest_lot_alert
     return latest_alert is not None and latest_alert.created_at >= threshold
 
 
-def create_alert(db: Session, warehouse_id: int, alert_type: str, message: str, lot_id: int | None = None) -> Alert | None:
+def create_alert(db: Session, warehouse_id: int, alert_type: str, message: str, lot_id: int | None = None):
     if _is_alert_in_cooldown(db, warehouse_id, alert_type):
         logger.debug(
             "alert_suppressed_by_cooldown",
@@ -66,13 +76,20 @@ def create_alert(db: Session, warehouse_id: int, alert_type: str, message: str, 
         return None
 
     email_sent = send_alert_email(f"FutureKawa alert: {alert_type}", message)
-    alert = Alert(
-        warehouse_id=warehouse_id,
-        lot_id=lot_id,
-        alert_type=alert_type,
-        message=message,
-        email_sent=email_sent,
-    )
+    if lot_id is None:
+        alert = AlertCapteur(
+            warehouse_id=warehouse_id,
+            alert_type=alert_type,
+            message=message,
+            email_sent=email_sent,
+        )
+    else:
+        alert = AlertLot(
+            lot_id=lot_id,
+            alert_type=alert_type,
+            message=message,
+            email_sent=email_sent,
+        )
     db.add(alert)
     db.commit()
     db.refresh(alert)
@@ -83,9 +100,14 @@ def create_alert(db: Session, warehouse_id: int, alert_type: str, message: str, 
     return alert
 
 
-def evaluate_reading(db: Session, warehouse: Warehouse, temperature: float, humidity: float) -> Alert | None:
-    out_of_temp = abs(temperature - warehouse.ideal_temp) > warehouse.temperature_tolerance
-    out_of_humidity = abs(humidity - warehouse.ideal_humidity) > warehouse.humidity_tolerance
+def evaluate_reading(db: Session, warehouse: Warehouse, temperature: float, humidity: float):
+    min_temp = warehouse.ideal_temperature - warehouse.temperature_tolerance_low
+    max_temp = warehouse.ideal_temperature + warehouse.temperature_tolerance_high
+    min_humidity = warehouse.ideal_humidity - warehouse.humidity_tolerance_low
+    max_humidity = warehouse.ideal_humidity + warehouse.humidity_tolerance_high
+
+    out_of_temp = temperature < min_temp or temperature > max_temp
+    out_of_humidity = humidity < min_humidity or humidity > max_humidity
     if not out_of_temp and not out_of_humidity:
         return None
 
@@ -123,8 +145,8 @@ def check_expired_lots(db: Session) -> int:
 
         if lot.storage_date < soon_expiration_threshold and lot.status != "perime":
             existing_soon_alert = (
-                db.query(Alert)
-                .filter(Alert.lot_id == lot.id, Alert.alert_type == "EXPIRATION_SOON")
+                db.query(AlertLot)
+                .filter(AlertLot.lot_id == lot.id, AlertLot.alert_type == "EXPIRATION_SOON")
                 .first()
             )
             if existing_soon_alert is None:

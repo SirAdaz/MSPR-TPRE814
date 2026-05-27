@@ -34,9 +34,11 @@ class Warehouse(Base):
     exploitation_id: Mapped[int] = mapped_column(ForeignKey("exploitations.id"), nullable=False)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     ideal_temperature: Mapped[float] = mapped_column(Float, nullable=False)
+    temperature_tolerance_low: Mapped[float] = mapped_column(Float, default=3.0)
+    temperature_tolerance_high: Mapped[float] = mapped_column(Float, default=3.0)
     ideal_humidity: Mapped[float] = mapped_column(Float, nullable=False)
-    temperature_tolerance: Mapped[float] = mapped_column(Float, default=3.0)
-    humidity_tolerance: Mapped[float] = mapped_column(Float, default=2.0)
+    humidity_tolerance_low: Mapped[float] = mapped_column(Float, default=2.0)
+    humidity_tolerance_high: Mapped[float] = mapped_column(Float, default=2.0)
 
     exploitation: Mapped[Exploitation] = relationship(back_populates="warehouses")
 
@@ -63,12 +65,22 @@ class SensorReading(Base):
     recorded_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 
-class Alert(Base):
-    __tablename__ = "alerts"
+class AlertLot(Base):
+    __tablename__ = "alert_lots"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    lot_id: Mapped[int] = mapped_column(ForeignKey("lots.id"), nullable=False)
+    alert_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    message: Mapped[str] = mapped_column(String(1024), nullable=False)
+    email_sent: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class AlertCapteur(Base):
+    __tablename__ = "alert_capteurs"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     warehouse_id: Mapped[int] = mapped_column(ForeignKey("warehouses.id"), nullable=False)
-    lot_id: Mapped[int | None] = mapped_column(ForeignKey("lots.id"), nullable=True)
     alert_type: Mapped[str] = mapped_column(String(64), nullable=False)
     message: Mapped[str] = mapped_column(String(1024), nullable=False)
     email_sent: Mapped[bool] = mapped_column(Boolean, default=False)
