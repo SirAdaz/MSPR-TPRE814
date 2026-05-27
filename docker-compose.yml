@@ -237,7 +237,7 @@ services:
       - ./jenkins/casc:/var/jenkins_home/casc:ro
 
   frontend:
-    image: node:20
+    image: node:22
     command: sh -c "npm install && until npx prisma migrate deploy; do echo 'Waiting for auth database...' && sleep 2; done && npx prisma generate && npm run dev -- --hostname 0.0.0.0 --port 3000 & NEXT_PID=$$! && node ./scripts/init-admin-user.mjs && wait $$NEXT_PID"
     working_dir: /app
     volumes:
