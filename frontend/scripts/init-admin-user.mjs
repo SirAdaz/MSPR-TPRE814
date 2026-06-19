@@ -7,7 +7,7 @@ async function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function waitForFrontendReady(retries = 40) {
+async function waitForFrontendReady(retries = 300) {
   for (let attempt = 1; attempt <= retries; attempt += 1) {
     try {
       const response = await fetch(`${BASE_URL}/login`, { method: "GET" });
