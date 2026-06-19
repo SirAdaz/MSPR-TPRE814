@@ -33,7 +33,7 @@ export default async function CountryPage({ params, searchParams }: Props) {
   const warehouseFilter = Number.isFinite(selectedWarehouseId) && selectedWarehouseId ? `&warehouse_id=${selectedWarehouseId}` : "";
   const [lots, alerts] = await Promise.all([
     showLots
-      ? fetchJson<Lot[]>(`/api/countries/${countryId}/lots?limit=5&offset=0&sort=storage_date&order=asc${warehouseFilter}`)
+      ? fetchJson<Lot[]>(`/api/countries/${countryId}/lots?limit=5&offset=0&sort=storage_date&order=desc${warehouseFilter}`)
       : Promise.resolve([]),
     showAlerts
       ? fetchJson<Alert[]>(`/api/countries/${countryId}/alerts?limit=5&offset=0${warehouseFilter}`)
