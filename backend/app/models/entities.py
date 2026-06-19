@@ -54,6 +54,8 @@ class Lot(Base):
     actual_dispatch_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     status: Mapped[str] = mapped_column(String(32), default="conforme")
 
+    alert_lots: Mapped[list["AlertLot"]] = relationship(cascade="all, delete-orphan")
+
 
 class SensorReading(Base):
     __tablename__ = "sensor_readings"
