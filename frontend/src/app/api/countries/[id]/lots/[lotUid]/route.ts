@@ -4,6 +4,15 @@ import { countryApiMap } from "@/lib/countries";
 
 const frontendApiKey = process.env.FRONTEND_API_KEY ?? "front-dev-key";
 
+async function parseResponse(response: Response): Promise<unknown> {
+  const text = await response.text();
+  try {
+    return JSON.parse(text);
+  } catch {
+    return { detail: text || "Unknown error" };
+  }
+}
+
 export async function GET(
   _: NextRequest,
   { params }: { params: Promise<{ id: string; lotUid: string }> },
@@ -15,7 +24,7 @@ export async function GET(
     cache: "no-store",
     headers: { "X-Frontend-Key": frontendApiKey },
   });
-  const data = await response.json();
+  const data = await parseResponse(response);
   return NextResponse.json(data, { status: response.status });
 }
 
@@ -34,7 +43,7 @@ export async function PUT(
     body: JSON.stringify(body),
     cache: "no-store",
   });
-  const data = await response.json();
+  const data = await parseResponse(response);
   return NextResponse.json(data, { status: response.status });
 }
 
@@ -51,6 +60,6 @@ export async function DELETE(
     headers: { "X-Frontend-Key": frontendApiKey },
     cache: "no-store",
   });
-  const data = await response.json();
+  const data = await parseResponse(response);
   return NextResponse.json(data, { status: response.status });
 }
