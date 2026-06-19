@@ -76,7 +76,7 @@ services:
 
   backend-br:
     build: ./backend
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload --reload-delay 0.5
     working_dir: /app
     volumes:
       - ./backend:/app
@@ -120,7 +120,7 @@ services:
 
   backend-ec:
     build: ./backend
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload --reload-delay 0.5
     working_dir: /app
     volumes:
       - ./backend:/app
@@ -164,7 +164,7 @@ services:
 
   backend-co:
     build: ./backend
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload --reload-delay 0.5
     working_dir: /app
     volumes:
       - ./backend:/app
@@ -254,6 +254,8 @@ services:
       BETTER_AUTH_URL_INTERNAL: http://127.0.0.1:3000
       DEFAULT_ADMIN_EMAIL: admin@futurekawa.local
       DEFAULT_ADMIN_PASSWORD: Admin123!
+      WATCHPACK_POLLING: "true"
+      CHOKIDAR_USEPOLLING: "true"
     healthcheck:
       test:
         [
