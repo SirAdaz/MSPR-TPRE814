@@ -106,6 +106,98 @@ export function CountryWarehouseView({
 
   return (
     <div className="mt-6 space-y-4">
+      {canManage ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>Ajouter un entrepot</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="mb-3 text-xs text-zinc-500">Les champs avec <span className="text-red-600">*</span> sont obligatoires.</p>
+              <form className="grid gap-3 md:grid-cols-2" onSubmit={handleCreateWarehouse}>
+                <label className="space-y-1 text-sm">
+                  <span className="text-zinc-700">Nom de l&apos;entrepot <span className="text-red-600">*</span></span>
+                  <Input
+                      placeholder="Ex: Warehouse BR-C"
+                      value={form.name}
+                      onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))}
+                      required
+                  />
+                </label>
+                <label className="space-y-1 text-sm">
+                  <span className="text-zinc-700">Temperature ideale (C) <span className="text-red-600">*</span></span>
+                  <Input
+                      type="number"
+                      step="0.1"
+                      placeholder="Ex: 18.5"
+                      value={form.ideal_temperature}
+                      onChange={(event) => setForm((prev) => ({ ...prev, ideal_temperature: event.target.value }))}
+                      required
+                  />
+                </label>
+                <label className="space-y-1 text-sm">
+                  <span className="text-zinc-700">Humidite ideale (%) <span className="text-red-600">*</span></span>
+                  <Input
+                      type="number"
+                      step="0.1"
+                      placeholder="Ex: 60"
+                      value={form.ideal_humidity}
+                      onChange={(event) => setForm((prev) => ({ ...prev, ideal_humidity: event.target.value }))}
+                      required
+                  />
+                </label>
+                <label className="space-y-1 text-sm">
+                  <span className="text-zinc-700">Tolerance temperature basse (C) <span className="text-red-600">*</span></span>
+                  <Input
+                      type="number"
+                      step="0.1"
+                      placeholder="Ex: 3"
+                      value={form.temperature_tolerance_low}
+                      onChange={(event) => setForm((prev) => ({ ...prev, temperature_tolerance_low: event.target.value }))}
+                      required
+                  />
+                </label>
+                <label className="space-y-1 text-sm md:col-span-2">
+                  <span className="text-zinc-700">Tolerance temperature haute (C) <span className="text-red-600">*</span></span>
+                  <Input
+                      type="number"
+                      step="0.1"
+                      placeholder="Ex: 3"
+                      value={form.temperature_tolerance_high}
+                      onChange={(event) => setForm((prev) => ({ ...prev, temperature_tolerance_high: event.target.value }))}
+                      required
+                  />
+                </label>
+                <label className="space-y-1 text-sm">
+                  <span className="text-zinc-700">Tolerance humidite basse (%) <span className="text-red-600">*</span></span>
+                  <Input
+                      type="number"
+                      step="0.1"
+                      placeholder="Ex: 5"
+                      value={form.humidity_tolerance_low}
+                      onChange={(event) => setForm((prev) => ({ ...prev, humidity_tolerance_low: event.target.value }))}
+                      required
+                  />
+                </label>
+                <label className="space-y-1 text-sm md:col-span-2">
+                  <span className="text-zinc-700">Tolerance humidite haute (%) <span className="text-red-600">*</span></span>
+                  <Input
+                      type="number"
+                      step="0.1"
+                      placeholder="Ex: 5"
+                      value={form.humidity_tolerance_high}
+                      onChange={(event) => setForm((prev) => ({ ...prev, humidity_tolerance_high: event.target.value }))}
+                      required
+                  />
+                </label>
+                <Button className="md:col-span-2" type="submit" disabled={submitting}>
+                  {submitting ? "Creation..." : "Ajouter l'entrepot"}
+                </Button>
+              </form>
+              {error ? <p className="mt-3 text-sm text-red-600">{error}</p> : null}
+            </CardContent>
+          </Card>
+      ) : null}
+
       <Card>
         <CardHeader>
           <CardTitle>Selection d&apos;entrepot</CardTitle>
@@ -135,102 +227,10 @@ export function CountryWarehouseView({
         </CardContent>
       </Card>
 
-      {canManage ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>Ajouter un entrepot</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="mb-3 text-xs text-zinc-500">Les champs avec <span className="text-red-600">*</span> sont obligatoires.</p>
-            <form className="grid gap-3 md:grid-cols-2" onSubmit={handleCreateWarehouse}>
-              <label className="space-y-1 text-sm">
-                <span className="text-zinc-700">Nom de l&apos;entrepot <span className="text-red-600">*</span></span>
-                <Input
-                  placeholder="Ex: Warehouse BR-C"
-                  value={form.name}
-                  onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))}
-                  required
-                />
-              </label>
-              <label className="space-y-1 text-sm">
-                <span className="text-zinc-700">Temperature ideale (C) <span className="text-red-600">*</span></span>
-                <Input
-                  type="number"
-                  step="0.1"
-                  placeholder="Ex: 18.5"
-                  value={form.ideal_temperature}
-                  onChange={(event) => setForm((prev) => ({ ...prev, ideal_temperature: event.target.value }))}
-                  required
-                />
-              </label>
-              <label className="space-y-1 text-sm">
-                <span className="text-zinc-700">Humidite ideale (%) <span className="text-red-600">*</span></span>
-                <Input
-                  type="number"
-                  step="0.1"
-                  placeholder="Ex: 60"
-                  value={form.ideal_humidity}
-                  onChange={(event) => setForm((prev) => ({ ...prev, ideal_humidity: event.target.value }))}
-                  required
-                />
-              </label>
-              <label className="space-y-1 text-sm">
-                <span className="text-zinc-700">Tolerance temperature basse (C) <span className="text-red-600">*</span></span>
-                <Input
-                  type="number"
-                  step="0.1"
-                  placeholder="Ex: 3"
-                  value={form.temperature_tolerance_low}
-                  onChange={(event) => setForm((prev) => ({ ...prev, temperature_tolerance_low: event.target.value }))}
-                  required
-                />
-              </label>
-              <label className="space-y-1 text-sm md:col-span-2">
-                <span className="text-zinc-700">Tolerance temperature haute (C) <span className="text-red-600">*</span></span>
-                <Input
-                  type="number"
-                  step="0.1"
-                  placeholder="Ex: 3"
-                  value={form.temperature_tolerance_high}
-                  onChange={(event) => setForm((prev) => ({ ...prev, temperature_tolerance_high: event.target.value }))}
-                  required
-                />
-              </label>
-              <label className="space-y-1 text-sm">
-                <span className="text-zinc-700">Tolerance humidite basse (%) <span className="text-red-600">*</span></span>
-                <Input
-                  type="number"
-                  step="0.1"
-                  placeholder="Ex: 5"
-                  value={form.humidity_tolerance_low}
-                  onChange={(event) => setForm((prev) => ({ ...prev, humidity_tolerance_low: event.target.value }))}
-                  required
-                />
-              </label>
-              <label className="space-y-1 text-sm md:col-span-2">
-                <span className="text-zinc-700">Tolerance humidite haute (%) <span className="text-red-600">*</span></span>
-                <Input
-                  type="number"
-                  step="0.1"
-                  placeholder="Ex: 5"
-                  value={form.humidity_tolerance_high}
-                  onChange={(event) => setForm((prev) => ({ ...prev, humidity_tolerance_high: event.target.value }))}
-                  required
-                />
-              </label>
-              <Button className="md:col-span-2" type="submit" disabled={submitting}>
-                {submitting ? "Creation..." : "Ajouter l'entrepot"}
-              </Button>
-            </form>
-            {error ? <p className="mt-3 text-sm text-red-600">{error}</p> : null}
-          </CardContent>
-        </Card>
-      ) : null}
-
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Lots de l&apos;entrepot</CardTitle>
+            <CardTitle>{selectedWarehouseId == null ? `Lots de l&apos;entrepot ${selectedWarehouseId}` : `Lots des entrepots`}</CardTitle>
           </CardHeader>
           <CardContent>
             {lots.length === 0 ? (
@@ -250,7 +250,7 @@ export function CountryWarehouseView({
 
         <Card>
           <CardHeader>
-            <CardTitle>Alertes de l&apos;entrepot</CardTitle>
+            <CardTitle>{selectedWarehouseId == null ? `Alertes de l&apos;entrepot ${selectedWarehouseId}` : `Alertes des entrepots  ${selectedWarehouseId}`}</CardTitle>
           </CardHeader>
           <CardContent>
             {alerts.length === 0 ? (

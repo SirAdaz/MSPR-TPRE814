@@ -114,7 +114,7 @@ export default async function CountryPage({ params, searchParams }: Props) {
         countryId={countryId}
         warehouses={warehouses}
         selectedWarehouseId={selectedWarehouseId}
-        lots={lots}
+        lots={selectedWarehouseId ? lots.filter((lot:Lot) => lot.warehouse_id = selectedWarehouseId) : lots}
         alerts={alerts}
         canManage={canManage}
       />
