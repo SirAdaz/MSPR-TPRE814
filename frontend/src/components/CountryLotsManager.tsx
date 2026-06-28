@@ -41,6 +41,10 @@ export function CountryLotsManager({ countryId, selectedWarehouseId }: Props) {
   const [form, setForm] = useState<LotForm>(initialForm);
   const [error, setError] = useState<string | null>(null);
 
+  const [searchUID, setSearchUID] = useState<string>("")
+  const [searchDate, setSearchDate] = useState<string>("")
+  const [searchStatut, setSearchStatut] = useState<string>("")
+
   async function loadLots() {
     setLoading(true);
     setError(null);
@@ -48,8 +52,9 @@ export function CountryLotsManager({ countryId, selectedWarehouseId }: Props) {
       const offset = page * PAGE_SIZE;
       const warehouseFilter =
         Number.isFinite(selectedWarehouseId) && selectedWarehouseId ? `&warehouse_id=${selectedWarehouseId}` : "";
+      const filter:string = `&uid=${searchUID}&date=${searchDate}&statut=${searchStatut}`;
       const response = await fetch(
-        `/api/countries/${countryId}/lots?limit=${PAGE_SIZE + 1}&offset=${offset}&sort=storage_date&order=asc${warehouseFilter}`,
+        `/api/countries/${countryId}/lots?limit=${PAGE_SIZE + 1}&offset=${offset}&sort=storage_date&order=asc${warehouseFilter}${filter}`,
         { cache: "no-store" },
       );
       const data = (await response.json()) as Lot[];
@@ -187,6 +192,40 @@ export function CountryLotsManager({ countryId, selectedWarehouseId }: Props) {
 
       <Card>
         <CardContent className="pt-6">
+          <div>
+            <form className="grid gap-3 md:grid-cols-4" onSubmit={(e) => { e.preventDefault(); setPage(0); void loadLots(); }}>
+              <label className="space-y-1 text-sm">
+                <span className="text-zinc-700">Lot UID</span>
+                <Input
+                    placeholder="Lot UID" value={searchUID}
+                    onChange={(event) => setSearchUID(event.target.value)}
+                />
+              </label>
+              <label className="space-y-1 text-sm">
+                <span className="text-zinc-700">Date de stockage</span>
+                <Input
+                    type="date" value={searchDate}
+                    onChange={(event) => setSearchDate(event.target.value)}
+                />
+              </label>
+              <label className="space-y-1 text-sm">
+                <span className="text-zinc-700">Statut</span>
+                <Select
+                    value={searchStatut}
+                    onChange={(event) => setSearchStatut(event.target.value)}
+                >
+                  <option value="">Tous</option>
+                  <option value="conforme">conforme</option>
+                  <option value="alerte">alerte</option>
+                  <option value="bientot_perime">bientot_perime</option>
+                  <option value="perime">perime</option>
+                  <option value="expedie">expedie</option>
+                </Select>
+              </label>
+              <Button className="md:col-span-4" type="submit">Rechercher</Button>
+            </form>
+            {error ? <p className="mt-3 text-sm text-red-600">{error}</p> : null}
+          </div>
           <Table>
             <TableHeader>
               <TableRow>
@@ -199,20 +238,20 @@ export function CountryLotsManager({ countryId, selectedWarehouseId }: Props) {
             </TableHeader>
             <TableBody>
               {loading ? (
-                <TableRow>
-                  <TableCell colSpan={5}>Chargement...</TableCell>
-                </TableRow>
+                  <TableRow>
+                    <TableCell colSpan={5}>Chargement...</TableCell>
+                  </TableRow>
               ) : (
-                lots.map((lot) => (
-                  <LotRow
-                    key={lot.id}
-                    lot={lot}
-                    editingUid={editingUid}
-                    onStartEdit={setEditingUid}
-                    onSave={handleUpdate}
-                    onRequestDelete={setLotUidToDelete}
-                  />
-                ))
+                  lots.map((lot) => (
+                      <LotRow
+                          key={lot.id}
+                          lot={lot}
+                          editingUid={editingUid}
+                          onStartEdit={setEditingUid}
+                          onSave={handleUpdate}
+                          onRequestDelete={setLotUidToDelete}
+                      />
+                  ))
               )}
             </TableBody>
           </Table>
@@ -226,31 +265,34 @@ export function CountryLotsManager({ countryId, selectedWarehouseId }: Props) {
             </Button>
           </div>
         </CardContent>
-      </Card>
-      {lotUidToDelete ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <Card className="w-full max-w-md">
-            <CardHeader>
-              <CardTitle>Confirmer la suppression</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-sm text-zinc-600">
-                Etes-vous sur de vouloir supprimer ce lot ? Cette action est irreversible.
-              </p>
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setLotUidToDelete(null)}>
-                  Annuler
-                </Button>
-                <Button variant="destructive" onClick={() => void confirmDelete()}>
-                  Supprimer
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      ) : null}
-    </div>
-  );
+    </Card>
+{
+  lotUidToDelete ? (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle>Confirmer la suppression</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-zinc-600">
+              Etes-vous sur de vouloir supprimer ce lot ? Cette action est irreversible.
+            </p>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setLotUidToDelete(null)}>
+                Annuler
+              </Button>
+              <Button variant="destructive" onClick={() => void confirmDelete()}>
+                Supprimer
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+  ) : null
+}
+</div>
+)
+  ;
 }
 
 type LotRowProps = {
@@ -261,18 +303,18 @@ type LotRowProps = {
   onRequestDelete: (lotUid: string) => void;
 };
 
-function LotRow({ lot, editingUid, onStartEdit, onSave, onRequestDelete }: LotRowProps) {
+function LotRow({lot, editingUid, onStartEdit, onSave, onRequestDelete}: LotRowProps) {
   const [editStatus, setEditStatus] = useState(lot.status);
   const [editDate, setEditDate] = useState(lot.storage_date);
   const isEditing = editingUid === lot.lot_uid;
 
   return (
-    <TableRow>
-      <TableCell>{lot.lot_uid}</TableCell>
-      <TableCell>{lot.warehouse_id}</TableCell>
-      <TableCell>
-        {isEditing ? (
-          <Input type="date" value={editDate} onChange={(event) => setEditDate(event.target.value)} />
+      <TableRow>
+        <TableCell>{lot.lot_uid.length > 20 ? lot.lot_uid.slice(0, 17)+"..." : lot.lot_uid}</TableCell>
+        <TableCell>{lot.warehouse_id}</TableCell>
+        <TableCell>
+          {isEditing ? (
+              <Input type="date" value={editDate} onChange={(event) => setEditDate(event.target.value)} />
         ) : (
           lot.storage_date
         )}

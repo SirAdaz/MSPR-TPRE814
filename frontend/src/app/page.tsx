@@ -88,7 +88,7 @@ export default async function HomePage() {
                   <p className="mb-2 text-sm font-medium">Dernieres alertes</p>
                   {previewMap.get(country.id)?.alerts.length ? (
                     <ul className="space-y-1 text-sm text-zinc-600">
-                      {previewMap.get(country.id)?.alerts.map((alert) => <li key={alert.id}>{alert.alert_type}</li>)}
+                      {previewMap.get(country.id)?.alerts.map((alert) => <li key={country.id+alert.id}>{alert.alert_type}</li>)}
                     </ul>
                   ) : (
                     <p className="text-sm text-zinc-500">Pas d&apos;acces ou aucune alerte.</p>
